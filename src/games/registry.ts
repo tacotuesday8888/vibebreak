@@ -11,7 +11,7 @@ export const games: GameDefinition[] = [
 	{
 		accent: 'green',
 		component: DodgeGame,
-		controls: 'A/D or arrows move · near misses score more · Q menu',
+		controls: 'A/D or arrows move · near misses score more · Q back',
 		description: 'Slide away from bugs, chain dodges, and flirt with danger.',
 		durationSeconds: 45,
 		id: 'dodge',
@@ -22,7 +22,7 @@ export const games: GameDefinition[] = [
 	{
 		accent: 'cyan',
 		component: CommitCatchGame,
-		controls: 'A/D or arrows move · catch ✓ + ☕ · avoid 🐛 !',
+		controls: 'A/D or arrows move · catch ✓ + ☕ · avoid 🐛 ! · Q back',
 		description: 'Catch good commits, keep a streak, avoid spicy diffs.',
 		durationSeconds: 45,
 		id: 'commit-catch',
@@ -33,7 +33,7 @@ export const games: GameDefinition[] = [
 	{
 		accent: 'magenta',
 		component: StackSprintGame,
-		controls: 'A/D or arrows move · grab FIX · dodge ERR · chain combos',
+		controls: 'A/D or arrows move · grab FIX · dodge ERR · chain combos · Q back',
 		description: 'Grab tiny fixes and sidestep errors as the trace speeds up.',
 		durationSeconds: 45,
 		id: 'stack-sprint',
@@ -44,7 +44,7 @@ export const games: GameDefinition[] = [
 	{
 		accent: 'green',
 		component: SnakeBytesGame,
-		controls: 'WASD or arrows steer · eat + ☕ · avoid walls/self · Q menu',
+		controls: 'WASD or arrows steer · eat + ☕ · avoid walls/self · Q back',
 		description: 'A tiny command trail that grows when it snacks.',
 		durationSeconds: 45,
 		id: 'snake-bytes',
@@ -55,7 +55,7 @@ export const games: GameDefinition[] = [
 	{
 		accent: 'cyan',
 		component: FlapFixGame,
-		controls: 'Space/W/↑ flap · pass gaps · catch FIX · Q menu',
+		controls: 'Space/W/↑ flap · pass gaps · catch FIX · Q back',
 		description: 'Tap through deploy pipes without clipping the build.',
 		durationSeconds: 45,
 		id: 'flap-fix',
@@ -66,7 +66,7 @@ export const games: GameDefinition[] = [
 	{
 		accent: 'yellow',
 		component: MazeMunchGame,
-		controls: 'WASD or arrows move · eat dots/☕ · dodge bugs · Q menu',
+		controls: 'WASD or arrows move · eat dots/☕ · dodge bugs · Q back',
 		description: 'Munch through a tiny maze and caffeinate into bug-chomp mode.',
 		durationSeconds: 45,
 		id: 'maze-munch',
@@ -77,7 +77,7 @@ export const games: GameDefinition[] = [
 	{
 		accent: 'blue',
 		component: BitStackGame,
-		controls: 'A/D move · W/↑ rotate · S/↓ drop · clear rows · Q menu',
+		controls: 'A/D move · W/↑ rotate · S/↓ drop · clear rows · Q back',
 		description: 'A compact falling-block stacker for terminal breaks.',
 		durationSeconds: 45,
 		id: 'bit-stack',

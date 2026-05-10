@@ -190,6 +190,7 @@ export const FlapFixGame = ({
 				let passes = current.passes;
 				let score = current.score;
 				let newFlash: FlashKind = null;
+				let hitThisTick = false;
 				const newPopups: Popup[] = [];
 
 				if (birdY < 0 || birdY >= BOARD_HEIGHT) {
@@ -201,6 +202,7 @@ export const FlapFixGame = ({
 					velocity = -1;
 					message = `${delta} gravity merge conflict. Back to cruising height.`;
 					newFlash = 'bad';
+					hitThisTick = true;
 					newPopups.push(createPopup(nextPopupId, delta, BIRD_X));
 					nextPopupId += 1;
 				}
@@ -212,7 +214,11 @@ export const FlapFixGame = ({
 						continue;
 					}
 
-					if (movedGate.x === BIRD_X && !isInGap(movedGate, birdY)) {
+					if (
+						!hitThisTick &&
+						movedGate.x === BIRD_X &&
+						!isInGap(movedGate, birdY)
+					) {
 						const delta = -8;
 						score += delta;
 						combo = 0;
@@ -221,12 +227,13 @@ export const FlapFixGame = ({
 						velocity = -1;
 						message = `${delta} clipped the deploy pipe. Tiny bonk.`;
 						newFlash = 'bad';
+						hitThisTick = true;
 						newPopups.push(createPopup(nextPopupId, delta, BIRD_X));
 						nextPopupId += 1;
 						continue;
 					}
 
-					if (movedGate.x === BIRD_X && movedGate.fixY === birdY) {
+					if (!hitThisTick && movedGate.x === BIRD_X && movedGate.fixY === birdY) {
 						const points = 6 + comboBonus(combo + 1);
 						score += points;
 						fixes += 1;

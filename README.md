@@ -183,6 +183,12 @@ Build:
 npm run build
 ```
 
+Run the local checks and smoke tests:
+
+```bash
+npm test
+```
+
 ## Features
 
 - Polished terminal menu with a filled selection bar
@@ -212,8 +218,7 @@ Good first contributions include bug fixes, README improvements, small gameplay 
 Before opening a pull request, run:
 
 ```bash
-npm run typecheck
-npm run build
+npm test
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution guide.

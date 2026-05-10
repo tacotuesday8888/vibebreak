@@ -4,6 +4,8 @@ All notable changes to Vibebreak are documented here.
 
 ## Unreleased
 
+- Polished the Choose Game and High Scores terminal screens for clearer scanning.
+
 ## 0.3.2 - 2026-05-10
 
 - Added pull request CI for `npm test` and `npm pack --dry-run`.

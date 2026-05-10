@@ -4,7 +4,7 @@ import {Box, Text, useInput} from 'ink';
 import type {InkColor} from '../types.js';
 
 export type MenuOption = {
-	description?: string;
+	description?: string | string[];
 	icon?: string;
 	label: string;
 	onSelect: () => void;
@@ -104,9 +104,16 @@ export const SelectableMenu = ({
 							) : (
 								<Text>{`   ${paddedLabel}  `}</Text>
 							)}
-							{option.description ? (
-								<Text dimColor>     {option.description}</Text>
-							) : null}
+							{option.description
+								? (Array.isArray(option.description)
+										? option.description
+										: [option.description]
+									).map((line, lineIndex) => (
+										<Text key={lineIndex} dimColor>
+											{`     ${line}`}
+										</Text>
+									))
+								: null}
 						</Box>
 					);
 				})}

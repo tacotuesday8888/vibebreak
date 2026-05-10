@@ -1,6 +1,6 @@
 {
   "name": "vibebreak-arcade",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A chaotic-cozy terminal break arcade for tiny coding-session resets.",
   "type": "module",
   "main": "dist/index.js",
@@ -21,6 +21,7 @@
     "bun:daily": "bun run src/index.tsx daily",
     "bun:start": "bun run src/index.tsx",
     "dev": "tsx watch src/index.tsx",
+    "prebuild": "node scripts/clean-dist.mjs",
     "prepare": "npm run build",
     "smoke": "node scripts/smoke-test.mjs",
     "start": "tsx src/index.tsx",

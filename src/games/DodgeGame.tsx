@@ -13,7 +13,7 @@ import {
 	useHorizontalControls,
 } from './gameHelpers.js';
 
-const TICK_MS = 220;
+const TICK_MS = 180;
 const SPAWN_EVERY_TICKS = 3;
 
 type Bug = FallingItem<'bug'>;
@@ -181,6 +181,8 @@ export const DodgeGame = ({
 			bestScore={bestScore}
 			board={board}
 			controls={definition.controls}
+			durationSeconds={definition.durationSeconds}
+			elapsedMs={state.elapsedMs}
 			flash={state.flash}
 			message={state.message}
 			score={state.score}

@@ -13,7 +13,7 @@ import {
 	useHorizontalControls,
 } from './gameHelpers.js';
 
-const TICK_MS = 180;
+const TICK_MS = 160;
 const SPAWN_EVERY_TICKS = 2;
 
 type StackItem = FallingItem<'err' | 'fix'>;
@@ -200,6 +200,8 @@ export const StackSprintGame = ({
 			bestScore={bestScore}
 			board={board}
 			controls={definition.controls}
+			durationSeconds={definition.durationSeconds}
+			elapsedMs={state.elapsedMs}
 			flash={state.flash}
 			message={state.message}
 			score={state.score}

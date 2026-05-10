@@ -11,6 +11,8 @@ type GameShellProps = {
 	bestScore?: number;
 	board: BoardCell[][];
 	controls: string;
+	durationSeconds: number;
+	elapsedMs: number;
 	flash?: 'bad' | 'good' | null;
 	message: string;
 	score: number;
@@ -20,6 +22,9 @@ type GameShellProps = {
 	}>;
 	title: string;
 };
+
+const CELL_WIDTH = 3;
+const PROGRESS_WIDTH = 24;
 
 const formatCell = (label: string): string => {
 	if (label === '🐛' || label === '☕') {
@@ -44,6 +49,26 @@ const borderColor = (
 	return accent;
 };
 
+const progressBar = (elapsedMs: number, durationSeconds: number): string => {
+	const durationMs = durationSeconds * 1000;
+	const progress = durationMs === 0 ? 1 : Math.min(1, elapsedMs / durationMs);
+	const filled = Math.round(progress * PROGRESS_WIDTH);
+
+	return `${'█'.repeat(filled)}${'░'.repeat(PROGRESS_WIDTH - filled)}`;
+};
+
+const vibeLabel = (flash: GameShellProps['flash']): string => {
+	if (flash === 'bad') {
+		return 'bonk';
+	}
+
+	if (flash === 'good') {
+		return 'spark';
+	}
+
+	return 'steady';
+};
+
 export const createEmptyBoard = (width: number, height: number): BoardCell[][] =>
 	Array.from({length: height}, () =>
 		Array.from({length: width}, () => ({label: ' '})),
@@ -54,46 +79,57 @@ export const GameShell = ({
 	bestScore,
 	board,
 	controls,
+	durationSeconds,
+	elapsedMs,
 	flash = null,
 	message,
 	score,
 	status,
 	title,
-}: GameShellProps) => (
-	<Box flexDirection="column" gap={1}>
-		<Box flexDirection="column">
-			<Text bold color={accent}>
-				✦ {title}
-			</Text>
-			<Text>
-				Score: <Text bold>{score}</Text>
-				{bestScore === undefined ? '' : `  Best: ${bestScore}`}
-				{'  '}
-				{status.map(item => `${item.label}: ${item.value}`).join('  ')}
-			</Text>
-		</Box>
+}: GameShellProps) => {
+	const rowWidth = (board[0]?.length ?? 0) * CELL_WIDTH;
+	const divider = '─'.repeat(rowWidth + 2);
+	const rows = board.map(row => row.map(cell => formatCell(cell.label)).join(''));
+	const currentBorderColor = borderColor(flash, accent);
 
-		<Box
-			borderColor={borderColor(flash, accent)}
-			borderStyle="round"
-			flexDirection="column"
-		>
-			{board.map((row, rowIndex) => (
-				<Text key={rowIndex}>
-					{row.map((cell, cellIndex) => (
-						<Text key={cellIndex} color={cell.color}>
-							{formatCell(cell.label)}
-						</Text>
-					))}
+	return (
+		<Box flexDirection="column" gap={1}>
+			<Box flexDirection="column">
+				<Text bold color={accent}>
+					✦ VIBEBREAK // {title}
 				</Text>
-			))}
-		</Box>
+				<Text>
+					Score <Text bold>{score}</Text>
+					{bestScore === undefined ? '' : `  Best ${bestScore}`}
+					{'  '}
+					{status.map(item => `${item.label} ${item.value}`).join('  ')}
+				</Text>
+				<Text color={accent}>
+					[{progressBar(elapsedMs, durationSeconds)}] vibe:{' '}
+					{vibeLabel(flash)}
+				</Text>
+			</Box>
 
-		<Box flexDirection="column">
-			<Text color={flash === 'bad' ? 'red' : flash === 'good' ? 'yellow' : accent}>
-				{message}
-			</Text>
-			<Text dimColor>{controls}</Text>
+			<Box flexDirection="column">
+				<Text color={currentBorderColor}>╭{divider}╮</Text>
+				{rows.map((row, rowIndex) => (
+					<Text key={rowIndex} color={currentBorderColor}>
+						│ <Text color="white">{row}</Text> │
+					</Text>
+				))}
+				<Text color={currentBorderColor}>╰{divider}╯</Text>
+			</Box>
+
+			<Box flexDirection="column">
+				<Text
+					bold={flash !== null}
+					color={flash === 'bad' ? 'red' : flash === 'good' ? 'yellow' : accent}
+				>
+					{flash === 'bad' ? '!! ' : flash === 'good' ? '++ ' : '·  '}
+					{message}
+				</Text>
+				<Text dimColor>{controls}</Text>
+			</Box>
 		</Box>
-	</Box>
-);
+	);
+};

@@ -1,6 +1,6 @@
 {
   "name": "vibebreak",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A chaotic-cozy terminal break arcade for tiny coding-session resets.",
   "type": "module",
   "main": "dist/index.js",

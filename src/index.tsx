@@ -16,7 +16,11 @@ if (command.kind === 'help') {
 
 	console.log(renderHelp());
 } else if (command.kind === 'agent') {
-	process.exitCode = await runAgentWrapper(command.tool, command.args);
+	process.exitCode = await runAgentWrapper(
+		command.tool,
+		command.args,
+		command.options,
+	);
 } else {
 	render(<App initialCommand={command} />);
 }

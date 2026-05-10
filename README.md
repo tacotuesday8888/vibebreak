@@ -49,13 +49,39 @@ vibebreak play dodge
 vibebreak play commit-catch
 vibebreak play stack-sprint
 vibebreak scores
+vibebreak agent codex --break=start -- "work on the next task"
 vibebreak agent codex -- --help
+vibebreak agent claude --break=both -- "fix the tests"
 vibebreak agent claude -- --help
 ```
 
 `vibebreak daily` chooses the same game for the same local calendar date, so Today's Break rotates without needing the internet.
 
-`vibebreak agent <codex|claude> -- [args...]` starts Codex or Claude through Vibebreak. If you opt in at launch and the wrapped session lasts at least 25 minutes, Vibebreak offers to start Today's Break when the session exits. It does not install shell hooks or modify your shell config.
+`vibebreak agent <codex|claude> -- [args...]` starts Codex or Claude through Vibebreak. It does not install shell hooks or modify your shell config.
+
+Agent break options:
+
+```bash
+vibebreak agent codex --break=start -- "build the feature"
+vibebreak agent claude --break=end -- "review this repo"
+vibebreak agent codex --break=both --threshold=15 -- "fix the tests"
+vibebreak agent claude --break=off -- --help
+```
+
+- `--break=start` offers Today's Break before the tool opens.
+- `--break=end` offers Today's Break after a long session. This is the default.
+- `--break=both` offers both.
+- `--break=off` runs the wrapped tool without game prompts.
+- `--threshold=25` controls the end-of-session prompt time in minutes.
+
+To make `codex` or `claude` automatically route through Vibebreak, add aliases in your shell config:
+
+```bash
+alias codex='vibebreak agent codex --break=start --'
+alias claude='vibebreak agent claude --break=start --'
+```
+
+A single terminal cannot cleanly show an interactive coding agent and an interactive game at the same time. If you want the agent to work while you play, run the agent in one terminal pane and `vibebreak daily` in another.
 
 ## Games
 

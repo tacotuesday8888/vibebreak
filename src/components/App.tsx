@@ -62,20 +62,23 @@ const MainMenu = ({
 		options={[
 			{
 				description: `Today: ${dailyGame.name}`,
+				icon: '✦',
 				label: "Play Today's Break",
 				onSelect: onStartDaily,
 			},
 			{
 				description: 'Pick from the cozy chaos arcade.',
+				icon: '▣',
 				label: 'Choose Game',
 				onSelect: onChooseGame,
 			},
 			{
 				description: 'Local best scores from this machine.',
+				icon: '★',
 				label: 'High Scores',
 				onSelect: onScores,
 			},
-			{label: 'Quit', onSelect: onQuit},
+			{icon: '×', label: 'Quit', onSelect: onQuit},
 		]}
 		subtitle="Tiny games for when your brain needs a stretch."
 		title="Vibebreak ✦ cozy chaos arcade"
@@ -94,6 +97,7 @@ const ChooseGameScreen = ({
 		onCancel={onBack}
 		options={games.map(game => ({
 			description: game.description,
+			icon: game.id === 'dodge' ? '🐛' : game.id === 'commit-catch' ? '✓' : '!',
 			label: game.name,
 			onSelect: () => {
 				onPlay(game.id);

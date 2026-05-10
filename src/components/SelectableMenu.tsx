@@ -4,6 +4,7 @@ import type {InkColor} from '../types.js';
 
 export type MenuOption = {
 	description?: string;
+	icon?: string;
 	label: string;
 	onSelect: () => void;
 };
@@ -65,9 +66,9 @@ export const SelectableMenu = ({
 		<Box flexDirection="column" gap={1}>
 			<Box flexDirection="column">
 				<Text bold color={accent}>
-					{title}
+					╭─ {title}
 				</Text>
-				{subtitle ? <Text>{subtitle}</Text> : null}
+				{subtitle ? <Text color={accent}>╰─ {subtitle}</Text> : null}
 			</Box>
 
 			<Box flexDirection="column">
@@ -76,9 +77,10 @@ export const SelectableMenu = ({
 
 					return (
 						<Box key={option.label} flexDirection="column">
-							<Text color={isSelected ? accent : undefined}>
+							<Text bold={isSelected} color={isSelected ? accent : undefined}>
 								{isSelected ? '› ' : '  '}
-								{index + 1}. {option.label}
+								{index + 1}. {option.icon ? `${option.icon} ` : ''}
+								{option.label}
 							</Text>
 							{option.description ? (
 								<Text dimColor>     {option.description}</Text>

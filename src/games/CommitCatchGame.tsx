@@ -13,7 +13,7 @@ import {
 	useHorizontalControls,
 } from './gameHelpers.js';
 
-const TICK_MS = 200;
+const TICK_MS = 170;
 const SPAWN_EVERY_TICKS = 2;
 
 type CommitItem = FallingItem<'bad' | 'good'> & {
@@ -213,6 +213,8 @@ export const CommitCatchGame = ({
 			bestScore={bestScore}
 			board={board}
 			controls={definition.controls}
+			durationSeconds={definition.durationSeconds}
+			elapsedMs={state.elapsedMs}
 			flash={state.flash}
 			message={state.message}
 			score={state.score}

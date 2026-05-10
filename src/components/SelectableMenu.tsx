@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import type {ReactNode} from 'react';
 import {Box, Text, useInput} from 'ink';
 import type {InkColor} from '../types.js';
 
@@ -12,6 +13,7 @@ export type MenuOption = {
 type SelectableMenuProps = {
 	accent?: InkColor;
 	footer?: string;
+	header?: ReactNode;
 	onCancel?: () => void;
 	options: MenuOption[];
 	subtitle?: string;
@@ -21,6 +23,7 @@ type SelectableMenuProps = {
 export const SelectableMenu = ({
 	accent = 'cyan',
 	footer,
+	header,
 	onCancel,
 	options,
 	subtitle,
@@ -64,12 +67,14 @@ export const SelectableMenu = ({
 
 	return (
 		<Box flexDirection="column" gap={1}>
-			<Box flexDirection="column">
-				<Text bold color={accent}>
-					╭─ {title}
-				</Text>
-				{subtitle ? <Text color={accent}>╰─ {subtitle}</Text> : null}
-			</Box>
+			{header ?? (
+				<Box flexDirection="column">
+					<Text bold color={accent}>
+						╭─ {title}
+					</Text>
+					{subtitle ? <Text color={accent}>╰─ {subtitle}</Text> : null}
+				</Box>
+			)}
 
 			<Box flexDirection="column">
 				{options.map((option, index) => {

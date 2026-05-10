@@ -13,6 +13,7 @@ import type {
 	ScoreEntry,
 	ScoreWriteResult,
 } from '../types.js';
+import {Logo} from './Logo.js';
 import {SelectableMenu} from './SelectableMenu.js';
 
 type Screen =
@@ -58,6 +59,7 @@ const MainMenu = ({
 	<SelectableMenu
 		accent="magenta"
 		footer="Use arrows or W/S, Enter to choose, Q to quit."
+		header={<Logo dailyGameName={dailyGame.name} />}
 		onCancel={onQuit}
 		options={[
 			{

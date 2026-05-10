@@ -157,7 +157,7 @@ Usage:
   vibebreak-arcade daily            Play today's break
   vibebreak-arcade play <game-id>   Play a specific game
   vibebreak-arcade scores           Show local high scores
-  vibebreak-arcade setup            Print Codex/Claude alias setup
+  vibebreak-arcade setup            Print optional Codex/Claude alias setup
   vibebreak-arcade agent <tool> [options] -- [args]
                                     Wrap codex or claude with break prompts
 
@@ -180,10 +180,11 @@ Examples:
   vibebreak-arcade agent claude --break=start -- "fix the tests"
 `;
 
-export const renderSetup = (): string => `Vibebreak setup
+export const renderSetup = (): string => `Vibebreak optional setup
 
-To make Vibebreak appear when you start a coding agent, add these aliases to
-your shell config file, usually ~/.zshrc on macOS:
+Vibebreak does not modify your shell by itself. If you want it to appear when
+you start a coding agent, you can manually add aliases like these to your shell
+config file, usually ~/.zshrc on macOS:
 
   alias codex='vibebreak-arcade agent codex --break=start --'
   alias claude='vibebreak-arcade agent claude --break=start --'
@@ -192,8 +193,8 @@ Then restart your terminal, or run:
 
   source ~/.zshrc
 
-After that, typing "codex ..." or "claude ..." will offer Today's Break before
-the agent starts.
+After that, typing "codex ..." or "claude ..." will route that command through
+Vibebreak and offer Today's Break before the agent starts.
 
 Useful variants:
 
@@ -202,6 +203,6 @@ Useful variants:
 
 Note:
   One terminal cannot comfortably run an interactive coding agent and an
-  interactive game at the same time. For true parallel play, open two terminal
+  interactive game at the same time. For true side-by-side play, open two terminal
   panes: run your agent in one and "vibebreak-arcade daily" in the other.
 `;

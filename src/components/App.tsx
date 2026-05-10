@@ -14,6 +14,7 @@ import type {
 	ScoreEntry,
 	ScoreWriteResult,
 } from '../types.js';
+import {colors} from '../utils/theme.js';
 import {Logo} from './Logo.js';
 import {SelectableMenu} from './SelectableMenu.js';
 
@@ -75,7 +76,7 @@ const MainMenu = ({
 	onStartDaily: () => void;
 }) => (
 	<SelectableMenu
-		accent="magenta"
+		accent={colors.brand}
 		footer="Use arrows or W/S, Enter to choose, Q to quit."
 		header={<Logo dailyGameName={dailyGame.name} />}
 		onCancel={onQuit}
@@ -283,10 +284,13 @@ const FinalScreen = ({
 		priorBest === undefined ? result.score > 0 : result.score > priorBest;
 	const divider = '─'.repeat(SCORECARD_INNER_WIDTH + 2);
 	const gameNamePad = padToInner(result.gameName.length);
+	const scoreStr = String(result.score).padStart(4);
+	const bestStr =
+		priorBest === undefined ? null : String(priorBest).padStart(4);
 	const scoreLineVisible =
-		priorBest === undefined
-			? `Score ${result.score}`
-			: `Score ${result.score}  Best ${priorBest}`;
+		bestStr === null
+			? `Score ${scoreStr}`
+			: `Score ${scoreStr}  Best ${bestStr}`;
 	const scoreLinePad = padToInner(scoreLineVisible.length);
 	const starsPad = padToInner(starsText.length);
 
@@ -294,11 +298,11 @@ const FinalScreen = ({
 		<Box flexDirection="column" gap={1}>
 			<Box flexDirection="column">
 				{isNewBest ? (
-					<Text bold color="yellow">
-						✦ NEW BEST ✦
+					<Text bold color={colors.accent}>
+						✦ new best
 					</Text>
 				) : null}
-				<Text bold color="magenta">
+				<Text bold color={colors.brand}>
 					Break complete ✦
 				</Text>
 			</Box>
@@ -317,12 +321,12 @@ const FinalScreen = ({
 					{'│ '}
 					<Text dimColor>Score </Text>
 					<Text bold color="white">
-						{result.score}
+						{scoreStr}
 					</Text>
-					{priorBest === undefined ? null : (
+					{bestStr === null ? null : (
 						<>
 							<Text dimColor>{'  Best '}</Text>
-							<Text color="white">{priorBest}</Text>
+							<Text color="white">{bestStr}</Text>
 						</>
 					)}
 					{scoreLinePad}
@@ -330,20 +334,21 @@ const FinalScreen = ({
 				</Text>
 				<Text color={accent}>
 					{'│ '}
-					<Text bold color="yellow">
+					<Text bold color={colors.accent}>
 						{starsText}
 					</Text>
 					{starsPad}
 					{' │'}
 				</Text>
 				{result.stats.map(stat => {
-					const text = `${stat.label} ${stat.value}`;
+					const valueStr = String(stat.value).padStart(4);
+					const text = `${stat.label} ${valueStr}`;
 					const pad = padToInner(text.length);
 					return (
 						<Text key={stat.label} color={accent}>
 							{'│ '}
 							<Text dimColor>{stat.label} </Text>
-							<Text color="white">{stat.value}</Text>
+							<Text color="white">{valueStr}</Text>
 							{pad}
 							{' │'}
 						</Text>
@@ -352,10 +357,10 @@ const FinalScreen = ({
 				<Text color={accent}>╰{divider}╯</Text>
 			</Box>
 
-			<Text color="yellow">{result.message}</Text>
+			<Text color={colors.accent}>{result.message}</Text>
 
 			<Box flexDirection="column">
-				<Text color={scoreWrite.saved ? 'green' : 'red'}>
+				<Text color={scoreWrite.saved ? colors.saved : colors.failed}>
 					{scoreWrite.saved
 						? 'Saved to local high scores.'
 						: 'Could not save locally; keeping this score for the session.'}

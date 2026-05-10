@@ -96,7 +96,10 @@ export const parseCliArgs = (args: string[]): ParsedCommand => {
 		const [gameId] = rest;
 
 		if (!gameId) {
-			return {error: 'Missing game id. Try: vibebreak play dodge', kind: 'help'};
+			return {
+				error: 'Missing game id. Try: vibebreak-arcade play dodge',
+				kind: 'help',
+			};
 		}
 
 		if (!getGameById(gameId)) {
@@ -116,7 +119,8 @@ export const parseCliArgs = (args: string[]): ParsedCommand => {
 
 		if (!tool || !isAgentTool(tool)) {
 			return {
-				error: 'Missing agent tool. Try: vibebreak agent codex -- --help',
+				error:
+					'Missing agent tool. Try: vibebreak-arcade agent codex -- --help',
 				kind: 'help',
 			};
 		}
@@ -149,12 +153,12 @@ export const renderHelp = (): string => `Vibebreak
 A chaotic-cozy terminal break arcade.
 
 Usage:
-  vibebreak                         Open the main menu
-  vibebreak daily                   Play today's break
-  vibebreak play <game-id>          Play a specific game
-  vibebreak scores                  Show local high scores
-  vibebreak setup                   Print Codex/Claude alias setup
-  vibebreak agent <tool> [options] -- [args]
+  vibebreak-arcade                  Open the main menu
+  vibebreak-arcade daily            Play today's break
+  vibebreak-arcade play <game-id>   Play a specific game
+  vibebreak-arcade scores           Show local high scores
+  vibebreak-arcade setup            Print Codex/Claude alias setup
+  vibebreak-arcade agent <tool> [options] -- [args]
                                     Wrap codex or claude with break prompts
 
 Agent options:
@@ -168,10 +172,10 @@ Games:
 ${games.map(game => `  ${game.id.padEnd(13)} ${game.name}`).join('\n')}
 
 Examples:
-  vibebreak play commit-catch
-  vibebreak setup
-  vibebreak agent codex -- --help
-  vibebreak agent claude --break=start -- "fix the tests"
+  vibebreak-arcade play commit-catch
+  vibebreak-arcade setup
+  vibebreak-arcade agent codex -- --help
+  vibebreak-arcade agent claude --break=start -- "fix the tests"
 `;
 
 export const renderSetup = (): string => `Vibebreak setup
@@ -179,8 +183,8 @@ export const renderSetup = (): string => `Vibebreak setup
 To make Vibebreak appear when you start a coding agent, add these aliases to
 your shell config file, usually ~/.zshrc on macOS:
 
-  alias codex='vibebreak agent codex --break=start --'
-  alias claude='vibebreak agent claude --break=start --'
+  alias codex='vibebreak-arcade agent codex --break=start --'
+  alias claude='vibebreak-arcade agent claude --break=start --'
 
 Then restart your terminal, or run:
 
@@ -191,11 +195,11 @@ the agent starts.
 
 Useful variants:
 
-  alias codex='vibebreak agent codex --break=both --threshold=20 --'
-  alias claude='vibebreak agent claude --break=end --threshold=25 --'
+  alias codex='vibebreak-arcade agent codex --break=both --threshold=20 --'
+  alias claude='vibebreak-arcade agent claude --break=end --threshold=25 --'
 
 Note:
   One terminal cannot comfortably run an interactive coding agent and an
   interactive game at the same time. For true parallel play, open two terminal
-  panes: run your agent in one and "vibebreak daily" in the other.
+  panes: run your agent in one and "vibebreak-arcade daily" in the other.
 `;

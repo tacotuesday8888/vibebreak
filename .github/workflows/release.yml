@@ -2,8 +2,9 @@ name: Release
 
 # Publishes vibebreak-arcade to npm whenever a SemVer tag (vX.Y.Z) is pushed.
 #
-# One-time setup before the first release:
-#   1. Create an automation-type access token at https://www.npmjs.com/settings/<your-user>/tokens
+# One-time setup before publishing:
+#   1. Create a granular npm access token at https://www.npmjs.com/settings/<your-user>/tokens
+#      with package read/write access and 2FA bypass for CI publishing.
 #   2. Add it as a repository secret named `NPM_TOKEN`
 #      (Settings -> Secrets and variables -> Actions -> New repository secret).
 #   3. Make sure `package.json` `version` matches the tag you push.
@@ -29,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'

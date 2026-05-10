@@ -3,7 +3,7 @@
 import {render} from 'ink';
 import {runAgentWrapper} from './agent.js';
 import {App} from './components/App.js';
-import {parseCliArgs, renderHelp} from './utils/cli.js';
+import {parseCliArgs, renderHelp, renderSetup} from './utils/cli.js';
 
 const command = parseCliArgs(process.argv.slice(2));
 
@@ -21,6 +21,8 @@ if (command.kind === 'help') {
 		command.args,
 		command.options,
 	);
+} else if (command.kind === 'setup') {
+	console.log(renderSetup());
 } else {
 	render(<App initialCommand={command} />);
 }

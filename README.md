@@ -49,6 +49,7 @@ vibebreak play dodge
 vibebreak play commit-catch
 vibebreak play stack-sprint
 vibebreak scores
+vibebreak setup
 vibebreak agent codex --break=start -- "work on the next task"
 vibebreak agent codex -- --help
 vibebreak agent claude --break=both -- "fix the tests"
@@ -83,6 +84,12 @@ alias claude='vibebreak agent claude --break=start --'
 
 A single terminal cannot cleanly show an interactive coding agent and an interactive game at the same time. If you want the agent to work while you play, run the agent in one terminal pane and `vibebreak daily` in another.
 
+You can print these setup notes anytime:
+
+```bash
+vibebreak setup
+```
+
 ## Games
 
 - **Dodge the Bugs**: slide away from falling `🐛` bugs and keep the vibe intact.
@@ -113,6 +120,15 @@ Run with automatic restarts:
 ```bash
 npm run dev
 ```
+
+If you already use Bun, there are optional convenience scripts:
+
+```bash
+npm run bun:start
+npm run bun:daily
+```
+
+Node remains the default runtime for the project.
 
 Check TypeScript:
 

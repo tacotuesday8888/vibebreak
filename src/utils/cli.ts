@@ -4,7 +4,8 @@ import {getGameById, games} from '../games/registry.js';
 export type ParsedCommand =
 	| AppCommand
 	| {args: string[]; kind: 'agent'; options: AgentOptions; tool: AgentTool}
-	| {error?: string; kind: 'help'};
+	| {error?: string; kind: 'help'}
+	| {kind: 'setup'};
 
 const isAgentTool = (value: string): value is AgentTool =>
 	value === 'codex' || value === 'claude';
@@ -87,6 +88,10 @@ export const parseCliArgs = (args: string[]): ParsedCommand => {
 		return {kind: 'scores'};
 	}
 
+	if (command === 'setup') {
+		return {kind: 'setup'};
+	}
+
 	if (command === 'play') {
 		const [gameId] = rest;
 
@@ -148,6 +153,7 @@ Usage:
   vibebreak daily                   Play today's break
   vibebreak play <game-id>          Play a specific game
   vibebreak scores                  Show local high scores
+  vibebreak setup                   Print Codex/Claude alias setup
   vibebreak agent <tool> [options] -- [args]
                                     Wrap codex or claude with break prompts
 
@@ -163,6 +169,33 @@ ${games.map(game => `  ${game.id.padEnd(13)} ${game.name}`).join('\n')}
 
 Examples:
   vibebreak play commit-catch
+  vibebreak setup
   vibebreak agent codex -- --help
   vibebreak agent claude --break=start -- "fix the tests"
+`;
+
+export const renderSetup = (): string => `Vibebreak setup
+
+To make Vibebreak appear when you start a coding agent, add these aliases to
+your shell config file, usually ~/.zshrc on macOS:
+
+  alias codex='vibebreak agent codex --break=start --'
+  alias claude='vibebreak agent claude --break=start --'
+
+Then restart your terminal, or run:
+
+  source ~/.zshrc
+
+After that, typing "codex ..." or "claude ..." will offer Today's Break before
+the agent starts.
+
+Useful variants:
+
+  alias codex='vibebreak agent codex --break=both --threshold=20 --'
+  alias claude='vibebreak agent claude --break=end --threshold=25 --'
+
+Note:
+  One terminal cannot comfortably run an interactive coding agent and an
+  interactive game at the same time. For true parallel play, open two terminal
+  panes: run your agent in one and "vibebreak daily" in the other.
 `;

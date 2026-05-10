@@ -18,6 +18,7 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+.claude/settings.local.json
 
 # OS files
 .DS_Store

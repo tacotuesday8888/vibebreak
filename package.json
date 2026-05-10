@@ -9,6 +9,7 @@
   },
   "files": [
     "dist",
+    "scripts",
     "README.md",
     "LICENSE"
   ],
@@ -19,7 +20,9 @@
     "bun:start": "bun run src/index.tsx",
     "dev": "tsx watch src/index.tsx",
     "prepare": "npm run build",
+    "smoke": "node scripts/smoke-test.mjs",
     "start": "tsx src/index.tsx",
+    "test": "npm run typecheck && npm run build && npm run smoke",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

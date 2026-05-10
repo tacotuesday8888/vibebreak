@@ -25,7 +25,7 @@ type Screen =
 			result: GameResult;
 			scoreWrite: ScoreWriteResult;
 	  }
-	| {mode: GameMode; name: 'playing'; gameId: GameId}
+	| {gameId: GameId; mode: GameMode; name: 'playing'; returnTo: ReturnTarget}
 	| {name: 'menu'}
 	| {name: 'scores'};
 
@@ -33,13 +33,25 @@ type AppProps = {
 	initialCommand?: AppCommand;
 };
 
+type ReturnTarget = 'exit' | 'menu';
+
 const initialScreenFromCommand = (command: AppCommand): Screen => {
 	if (command.kind === 'daily') {
-		return {gameId: getDailyGame(games).id, mode: 'daily', name: 'playing'};
+		return {
+			gameId: getDailyGame(games).id,
+			mode: 'daily',
+			name: 'playing',
+			returnTo: 'exit',
+		};
 	}
 
 	if (command.kind === 'play') {
-		return {gameId: command.gameId, mode: 'direct', name: 'playing'};
+		return {
+			gameId: command.gameId,
+			mode: 'direct',
+			name: 'playing',
+			returnTo: 'exit',
+		};
 	}
 
 	if (command.kind === 'scores') {
@@ -368,17 +380,25 @@ export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
 	const [lastGame, setLastGame] = useState<{
 		gameId: GameId;
 		mode: GameMode;
+		returnTo: ReturnTarget;
 	} | null>(() =>
 		initialScreen.name === 'playing'
-			? {gameId: initialScreen.gameId, mode: initialScreen.mode}
+			? {
+					gameId: initialScreen.gameId,
+					mode: initialScreen.mode,
+					returnTo: initialScreen.returnTo,
+			  }
 			: null,
 	);
 	const dailyGame = useMemo(() => getDailyGame(games), []);
 
-	const startGame = useCallback((gameId: GameId, mode: GameMode) => {
-		setLastGame({gameId, mode});
-		setScreen({gameId, mode, name: 'playing'});
-	}, []);
+	const startGame = useCallback(
+		(gameId: GameId, mode: GameMode, returnTo: ReturnTarget = 'menu') => {
+			setLastGame({gameId, mode, returnTo});
+			setScreen({gameId, mode, name: 'playing', returnTo});
+		},
+		[],
+	);
 
 	const finishGame = useCallback(
 		(result: GameResult) => {
@@ -407,6 +427,11 @@ export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
 				bestScore={getBestScore(scores, game.id)}
 				definition={game}
 				onExit={() => {
+					if (screen.returnTo === 'exit') {
+						exit();
+						return;
+					}
+
 					setScreen({name: 'menu'});
 				}}
 				onFinish={finishGame}
@@ -431,6 +456,11 @@ export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
 		return (
 			<ScoresScreen
 				onBack={() => {
+					if (initialCommand.kind === 'scores') {
+						exit();
+						return;
+					}
+
 					setScreen({name: 'menu'});
 				}}
 				scores={scores}
@@ -447,7 +477,7 @@ export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
 				onQuit={exit}
 				onRestart={() => {
 					if (lastGame) {
-						startGame(lastGame.gameId, lastGame.mode);
+						startGame(lastGame.gameId, lastGame.mode, lastGame.returnTo);
 					}
 				}}
 				onScores={() => {

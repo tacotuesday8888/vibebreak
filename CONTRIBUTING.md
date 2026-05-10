@@ -26,8 +26,7 @@ npm start
 Run checks before opening a pull request:
 
 ```bash
-npm run typecheck
-npm run build
+npm test
 ```
 
 ## Pull requests

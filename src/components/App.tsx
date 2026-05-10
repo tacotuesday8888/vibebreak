@@ -117,7 +117,10 @@ const ChooseGameScreen = ({
 		accent="cyan"
 		onCancel={onBack}
 		options={games.map(game => ({
-			description: `${game.description} · ${game.controls}`,
+			description: [
+				game.description,
+				game.controls.replace(/\s*·\s*Q back\s*$/, ''),
+			],
 			icon: game.icon,
 			label: game.name,
 			onSelect: () => {
@@ -147,9 +150,10 @@ const ScoresScreen = ({
 	return (
 		<Box flexDirection="column" gap={1}>
 			<Box flexDirection="column">
-				<Text bold color="yellow">
-					High Scores
+				<Text bold color={colors.accent}>
+					╭─ High Scores
 				</Text>
+				<Text color={colors.accent}>╰─ Top 5 per game on this machine.</Text>
 				<Text dimColor>{getScoresPath()}</Text>
 			</Box>
 
@@ -168,8 +172,13 @@ const ScoresScreen = ({
 						) : (
 							topScores.map((score, index) => (
 								<Text key={`${score.playedAt}-${index}`}>
-									{String(index + 1).padStart(2, ' ')}. {score.score}  ·{' '}
-									{score.mode} · {formatDateTime(score.playedAt)}
+									<Text dimColor>
+										{String(index + 1).padStart(2, ' ')}.{' '}
+									</Text>
+									<Text bold>{String(score.score).padStart(4)}</Text>
+									<Text dimColor>
+										{`  · ${score.mode} · ${formatDateTime(score.playedAt)}`}
+									</Text>
 								</Text>
 							))
 						)}

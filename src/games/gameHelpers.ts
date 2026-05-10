@@ -1,11 +1,18 @@
 import {useEffect, useMemo, useRef} from 'react';
 import {useInput} from 'ink';
 import type {BoardCell} from '../components/GameShell.js';
-import type {GameResult} from '../types.js';
+import type {GameResult, InkColor} from '../types.js';
 
 export const BOARD_WIDTH = 18;
 export const BOARD_HEIGHT = 12;
 export const PLAYER_ROW = BOARD_HEIGHT - 1;
+
+export const PLAYER_SPRITE = '<o>';
+export const PLAYER_SPRITE_HIT = '>x<';
+export const POPUP_TICKS_TO_LIVE = 3;
+export const POPUP_START_Y = PLAYER_ROW - 1;
+
+export type FlashKind = 'bad' | 'good' | null;
 
 export type FallingItem<TKind extends string> = {
 	id: number;
@@ -13,6 +20,83 @@ export type FallingItem<TKind extends string> = {
 	label: string;
 	x: number;
 	y: number;
+};
+
+export type PopupKind = 'bad' | 'good';
+
+export type Popup = {
+	id: number;
+	kind: PopupKind;
+	text: string;
+	ticksLeft: number;
+	x: number;
+	y: number;
+};
+
+export const formatPopupText = (delta: number): string => {
+	const sign = delta >= 0 ? '+' : '-';
+	const magnitude = Math.min(Math.abs(delta), 99);
+	return `${sign}${magnitude}`.padEnd(3, ' ').slice(0, 3);
+};
+
+export const createPopup = (
+	id: number,
+	delta: number,
+	x: number,
+	kind: PopupKind = delta >= 0 ? 'good' : 'bad',
+	y: number = POPUP_START_Y,
+): Popup => ({
+	id,
+	kind,
+	text: formatPopupText(delta),
+	ticksLeft: POPUP_TICKS_TO_LIVE,
+	x,
+	y,
+});
+
+export const advancePopups = (popups: Popup[]): Popup[] =>
+	popups
+		.map(popup => ({
+			...popup,
+			ticksLeft: popup.ticksLeft - 1,
+			y: popup.y - 1,
+		}))
+		.filter(popup => popup.ticksLeft > 0 && popup.y >= 0);
+
+export const popupColor = (kind: PopupKind): InkColor =>
+	kind === 'good' ? 'yellow' : 'red';
+
+export const advanceFlash = (
+	currentFlash: FlashKind,
+	currentTicksLeft: number,
+	newFlash: FlashKind,
+): {flash: FlashKind; flashTicksLeft: number} => {
+	if (newFlash !== null) {
+		return {flash: newFlash, flashTicksLeft: 2};
+	}
+
+	const next = Math.max(0, currentTicksLeft - 1);
+
+	if (next === 0) {
+		return {flash: null, flashTicksLeft: 0};
+	}
+
+	return {flash: currentFlash, flashTicksLeft: next};
+};
+
+export const playerSpriteFor = (flash: FlashKind): string =>
+	flash === 'bad' ? PLAYER_SPRITE_HIT : PLAYER_SPRITE;
+
+export const playerColorFor = (flash: FlashKind): InkColor => {
+	if (flash === 'bad') {
+		return 'red';
+	}
+
+	if (flash === 'good') {
+		return 'yellow';
+	}
+
+	return 'white';
 };
 
 export const useHorizontalControls = (
@@ -59,13 +143,17 @@ export const useFinishOnce = (
 export const useBoard = <TItem extends FallingItem<string>>({
 	itemColor,
 	items,
+	playerColor = 'white',
+	playerLabel = PLAYER_SPRITE,
 	playerX,
-	playerLabel = '>',
+	popups = [],
 }: {
 	itemColor: (item: TItem) => BoardCell['color'];
 	items: TItem[];
+	playerColor?: BoardCell['color'];
 	playerLabel?: string;
 	playerX: number;
+	popups?: Popup[];
 }): BoardCell[][] =>
 	useMemo(() => {
 		const board: BoardCell[][] = Array.from({length: BOARD_HEIGHT}, () =>
@@ -86,10 +174,25 @@ export const useBoard = <TItem extends FallingItem<string>>({
 			}
 		}
 
-		board[PLAYER_ROW]![playerX] = {color: 'white', label: playerLabel};
+		board[PLAYER_ROW]![playerX] = {color: playerColor, label: playerLabel};
+
+		// Popups paint on top so the score change always reads.
+		for (const popup of popups) {
+			if (
+				popup.y >= 0 &&
+				popup.y < BOARD_HEIGHT &&
+				popup.x >= 0 &&
+				popup.x < BOARD_WIDTH
+			) {
+				board[popup.y]![popup.x] = {
+					color: popupColor(popup.kind),
+					label: popup.text,
+				};
+			}
+		}
 
 		return board;
-	}, [itemColor, items, playerLabel, playerX]);
+	}, [itemColor, items, playerColor, playerLabel, playerX, popups]);
 
 export const moveLeft = (position: number): number => Math.max(0, position - 1);
 

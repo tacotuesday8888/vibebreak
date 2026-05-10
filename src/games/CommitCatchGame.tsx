@@ -4,12 +4,18 @@ import type {GameComponentProps, GameResult, InkColor} from '../types.js';
 import {
 	BOARD_WIDTH,
 	FallingItem,
+	FlashKind,
 	PLAYER_ROW,
+	Popup,
+	advanceFlash,
+	advancePopups,
 	comboBonus,
+	createPopup,
 	moveLeft,
 	moveRight,
+	playerColorFor,
+	playerSpriteFor,
 	spawnEveryTicks,
-	timeLeftSeconds,
 	useBoard,
 	useFinishOnce,
 	useHorizontalControls,
@@ -27,12 +33,15 @@ type CommitState = {
 	catches: number;
 	combo: number;
 	elapsedMs: number;
-	flash: 'bad' | 'good' | null;
+	flash: FlashKind;
+	flashTicksLeft: number;
 	items: CommitItem[];
 	message: string;
 	misses: number;
 	nextId: number;
+	nextPopupId: number;
 	playerX: number;
+	popups: Popup[];
 	score: number;
 	tick: number;
 };
@@ -54,11 +63,14 @@ const initialState = (): CommitState => ({
 	combo: 0,
 	elapsedMs: 0,
 	flash: null,
+	flashTicksLeft: 0,
 	items: [],
 	message: 'Catch useful commits. Avoid chaos with legs.',
 	misses: 0,
 	nextId: 1,
+	nextPopupId: 1,
 	playerX: Math.floor(BOARD_WIDTH / 2),
+	popups: [],
 	score: 0,
 	tick: 0,
 });
@@ -121,13 +133,15 @@ export const CommitCatchGame = ({
 				);
 				const tick = current.tick + 1;
 				const items: CommitItem[] = [];
+				const newPopups: Popup[] = [];
+				let nextPopupId = current.nextPopupId;
 				let bestCombo = current.bestCombo;
 				let catches = current.catches;
 				let combo = current.combo;
 				let misses = current.misses;
 				let score = current.score;
 				let message = current.message;
-				let flash: CommitState['flash'] = null;
+				let newFlash: FlashKind = null;
 
 				for (const item of current.items) {
 					const movedItem = {...item, y: item.y + 1};
@@ -141,16 +155,25 @@ export const CommitCatchGame = ({
 							const bonus = comboBonus(combo);
 							score += bonus;
 							catches += 1;
+							const totalDelta = movedItem.points + bonus;
 							message =
 								bonus > 0
-									? `+${movedItem.points + bonus} caught ${movedItem.label}. Combo x${combo}.`
+									? `+${totalDelta} caught ${movedItem.label}. Combo x${combo}.`
 									: `+${movedItem.points} caught ${movedItem.label}. Ship it gently.`;
-							flash = 'good';
+							newFlash = 'good';
+							newPopups.push(
+								createPopup(nextPopupId, totalDelta, current.playerX),
+							);
+							nextPopupId += 1;
 						} else {
 							combo = 0;
 							misses += 1;
 							message = `${movedItem.points} caught ${movedItem.label}. Oops, spicy diff.`;
-							flash = 'bad';
+							newFlash = 'bad';
+							newPopups.push(
+								createPopup(nextPopupId, movedItem.points, current.playerX),
+							);
+							nextPopupId += 1;
 						}
 
 						continue;
@@ -162,7 +185,9 @@ export const CommitCatchGame = ({
 							combo = 0;
 							misses += 1;
 							message = '-1 useful thing drifted away. Combo took a nap.';
-							flash = 'bad';
+							newFlash = 'bad';
+							newPopups.push(createPopup(nextPopupId, -1, movedItem.x));
+							nextPopupId += 1;
 						}
 
 						continue;
@@ -187,17 +212,27 @@ export const CommitCatchGame = ({
 					nextId += 1;
 				}
 
+				const popups = [...advancePopups(current.popups), ...newPopups];
+				const {flash, flashTicksLeft} = advanceFlash(
+					current.flash,
+					current.flashTicksLeft,
+					newFlash,
+				);
+
 				return {
 					bestCombo,
 					catches,
 					combo,
 					elapsedMs,
 					flash,
+					flashTicksLeft,
 					items,
 					message,
 					misses,
 					nextId,
+					nextPopupId,
 					playerX: current.playerX,
+					popups,
 					score,
 					tick,
 				};
@@ -241,13 +276,21 @@ export const CommitCatchGame = ({
 		(item: CommitItem): InkColor => (item.kind === 'good' ? 'cyan' : 'red'),
 		[],
 	);
-	const board = useBoard({itemColor, items: state.items, playerX: state.playerX});
+	const board = useBoard({
+		itemColor,
+		items: state.items,
+		playerColor: playerColorFor(state.flash),
+		playerLabel: playerSpriteFor(state.flash),
+		playerX: state.playerX,
+		popups: state.popups,
+	});
 
 	return (
 		<GameShell
 			accent={definition.accent}
 			bestScore={bestScore}
 			board={board}
+			combo={state.combo}
 			controls={definition.controls}
 			durationSeconds={definition.durationSeconds}
 			elapsedMs={state.elapsedMs}
@@ -255,8 +298,6 @@ export const CommitCatchGame = ({
 			message={state.message}
 			score={state.score}
 			status={[
-				{label: 'Time', value: `${timeLeftSeconds(definition.durationSeconds, state.elapsedMs)}s`},
-				{label: 'Combo', value: `x${state.combo}`},
 				{label: 'Caught', value: state.catches},
 				{label: 'Oops', value: state.misses},
 			]}

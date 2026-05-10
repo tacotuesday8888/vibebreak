@@ -1,0 +1,43 @@
+{
+  "name": "vibebreak",
+  "version": "0.1.0",
+  "description": "A tiny terminal game for dodging bugs during a quick vibe break.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "vibebreak": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.tsx",
+    "start": "tsx src/index.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "cli",
+    "game",
+    "ink",
+    "react",
+    "terminal",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "ink": "^7.0.2",
+    "react": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}

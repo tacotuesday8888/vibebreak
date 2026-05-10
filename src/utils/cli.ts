@@ -186,6 +186,8 @@ Vibebreak does not modify your shell by itself. If you want it to appear when
 you start a coding agent, you can manually add aliases like these to your shell
 config file, usually ~/.zshrc on macOS:
 
+  npm install --global vibebreak-arcade
+
   alias codex='vibebreak-arcade agent codex --break=start --'
   alias claude='vibebreak-arcade agent claude --break=start --'
 

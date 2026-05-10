@@ -1,7 +1,8 @@
 import {useEffect, useMemo, useState} from 'react';
 import {GameShell} from '../components/GameShell.js';
 import type {BoardCell} from '../components/GameShell.js';
-import type {GameComponentProps, GameResult, InkColor} from '../types.js';
+import type {GameComponentProps, GameResult} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {
 	BOARD_HEIGHT,
 	BOARD_WIDTH,
@@ -128,15 +129,30 @@ const buildBoard = ({
 }): BoardCell[][] => {
 	const board = createBoard();
 
-	paintCell(board, snack.point, snack.label, snack.label === '☕' ? 'yellow' : 'cyan');
+	paintCell(
+		board,
+		snack.point,
+		snack.label,
+		snack.label === '☕' ? colors.accent : colors.brandAlt,
+	);
 
 	for (let index = snake.length - 1; index >= 0; index -= 1) {
 		const point = snake[index]!;
-		paintCell(board, point, index === 0 ? '@' : 'o', index === 0 ? 'green' : 'cyan');
+		paintCell(
+			board,
+			point,
+			index === 0 ? '@' : 'o',
+			index === 0 ? colors.saved : colors.brandAlt,
+		);
 	}
 
 	for (const popup of popups) {
-		paintCell(board, popup, popup.text, popup.kind === 'good' ? 'yellow' : 'red');
+		paintCell(
+			board,
+			popup,
+			popup.text,
+			popup.kind === 'good' ? colors.accent : colors.failed,
+		);
 	}
 
 	return board;

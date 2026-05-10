@@ -81,7 +81,7 @@ export const Logo = ({dailyGameName}: LogoProps) => {
 		<Box flexDirection="column" gap={1}>
 			<Box flexDirection="column">
 				{WORDMARK.map((line, index) => {
-					const style = WORDMARK_STYLES[index] ?? {color: 'cyan'};
+					const style = WORDMARK_STYLES[index] ?? {color: colors.brandAlt};
 					return (
 						<Text
 							key={index}

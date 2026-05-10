@@ -3,6 +3,7 @@ import {useInput} from 'ink';
 import {GameShell} from '../components/GameShell.js';
 import type {BoardCell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {
 	BOARD_HEIGHT,
 	BOARD_WIDTH,
@@ -125,19 +126,24 @@ const buildBoard = ({
 
 		for (let y = 0; y < BOARD_HEIGHT; y += 1) {
 			if (!isInGap(gate, y)) {
-				paintCell(board, {x: gate.x, y}, '#', 'cyan');
+				paintCell(board, {x: gate.x, y}, '#', colors.brandAlt);
 			}
 		}
 
 		if (gate.fixY !== undefined) {
-			paintCell(board, {x: gate.x, y: gate.fixY}, 'FIX', 'yellow');
+			paintCell(board, {x: gate.x, y: gate.fixY}, 'FIX', colors.accent);
 		}
 	}
 
-	paintCell(board, {x: BIRD_X, y: birdY}, '>', 'yellow');
+	paintCell(board, {x: BIRD_X, y: birdY}, '>', colors.accent);
 
 	for (const popup of popups) {
-		paintCell(board, popup, popup.text, popup.kind === 'good' ? 'yellow' : 'red');
+		paintCell(
+			board,
+			popup,
+			popup.text,
+			popup.kind === 'good' ? colors.accent : colors.failed,
+		);
 	}
 
 	return board;

@@ -1,5 +1,6 @@
 import {Box, Text} from 'ink';
 import type {InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 
 export type BoardCell = {
 	color?: InkColor;
@@ -50,11 +51,11 @@ const borderColor = (
 	accent: InkColor,
 ): InkColor => {
 	if (flash === 'bad') {
-		return 'red';
+		return colors.failed;
 	}
 
 	if (flash === 'good') {
-		return 'yellow';
+		return colors.accent;
 	}
 
 	return accent;
@@ -73,26 +74,26 @@ const progressBar = (elapsedMs: number, durationSeconds: number): string => {
 
 const comboColor = (combo: number): InkColor => {
 	if (combo >= 6) {
-		return 'magenta';
+		return colors.brand;
 	}
 
 	if (combo >= 3) {
-		return 'cyan';
+		return colors.brandAlt;
 	}
 
-	return 'white';
+	return colors.text;
 };
 
 const timeColor = (remainingMs: number, durationMs: number): InkColor => {
 	if (remainingMs <= 5000) {
-		return 'red';
+		return colors.failed;
 	}
 
 	if (durationMs > 0 && remainingMs / durationMs <= 0.34) {
-		return 'yellow';
+		return colors.accent;
 	}
 
-	return 'green';
+	return colors.saved;
 };
 
 const vibeLabel = (flash: GameShellProps['flash']): string => {
@@ -278,7 +279,7 @@ export const GameShell = ({
 							}
 
 							return (
-								<Text key={cellIndex} color={cell.color ?? 'white'}>
+								<Text key={cellIndex} color={cell.color ?? colors.text}>
 									{formatCell(cell.label)}
 								</Text>
 							);
@@ -294,7 +295,13 @@ export const GameShell = ({
 			<Box flexDirection="column">
 				<Text
 					bold={flash !== null}
-					color={flash === 'bad' ? 'red' : flash === 'good' ? 'yellow' : accent}
+					color={
+						flash === 'bad'
+							? colors.failed
+							: flash === 'good'
+								? colors.accent
+								: accent
+					}
 				>
 					{flash === 'bad' ? '!! ' : flash === 'good' ? '++ ' : '·  '}
 					{message}

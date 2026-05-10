@@ -3,6 +3,7 @@ import {useInput} from 'ink';
 import {GameShell} from '../components/GameShell.js';
 import type {BoardCell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult, InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {
 	Banner,
 	FlashKind,
@@ -67,7 +68,7 @@ type StackState = {
 
 const PIECES: PieceTemplate[] = [
 	{
-		color: 'yellow',
+		color: colors.accent,
 		label: '[]',
 		rotates: false,
 		shape: [
@@ -78,7 +79,7 @@ const PIECES: PieceTemplate[] = [
 		],
 	},
 	{
-		color: 'cyan',
+		color: colors.brandAlt,
 		label: '==',
 		shape: [
 			{x: 0, y: 0},
@@ -88,7 +89,7 @@ const PIECES: PieceTemplate[] = [
 		],
 	},
 	{
-		color: 'magenta',
+		color: colors.brand,
 		label: 'LL',
 		shape: [
 			{x: 0, y: 0},
@@ -98,7 +99,7 @@ const PIECES: PieceTemplate[] = [
 		],
 	},
 	{
-		color: 'green',
+		color: colors.saved,
 		label: 'TT',
 		shape: [
 			{x: 1, y: 0},
@@ -325,7 +326,12 @@ const buildBoard = ({
 	}
 
 	for (const popup of popups) {
-		paintCell(board, popup, popup.text, popup.kind === 'good' ? 'yellow' : 'red');
+		paintCell(
+			board,
+			popup,
+			popup.text,
+			popup.kind === 'good' ? colors.accent : colors.failed,
+		);
 	}
 
 	return board;

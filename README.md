@@ -5,10 +5,10 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/vibebreak-arcade"><img alt="npm version" src="https://img.shields.io/npm/v/vibebreak-arcade?label=npm&color=cb5cff"></a>
+  <a href="https://www.npmjs.com/package/vibebreak-arcade"><img alt="npm version" src="https://img.shields.io/npm/v/vibebreak-arcade?label=npm&color=F15BFF"></a>
   <a href="https://github.com/tacotuesday8888/vibebreak/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/tacotuesday8888/vibebreak/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-facc15"></a>
-  <img alt="Node.js 22+" src="https://img.shields.io/badge/node-%3E%3D22-67e8f9">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-FFE45E"></a>
+  <img alt="Node.js 22+" src="https://img.shields.io/badge/node-%3E%3D22-5DF4FF">
 </p>
 
 Vibebreak is a chaotic-cozy terminal break arcade built with Node.js, TypeScript, Ink, and React. It gives you short 45-second mini-games for tiny brain resets, with local high scores and no backend, login, cloud service, AI, payments, analytics, or telemetry.
@@ -156,7 +156,7 @@ Emoji rendering depends on your terminal font. If `🐛` or `☕` look misaligne
 
 ## Project Status
 
-- Latest stable npm release: `vibebreak-arcade@0.3.3`
+- Latest stable npm release: `vibebreak-arcade@0.3.4`
 - Release history: [CHANGELOG.md](CHANGELOG.md)
 - CI: `npm test` and `npm pack --dry-run`
 - License: MIT

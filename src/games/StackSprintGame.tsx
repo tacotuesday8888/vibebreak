@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {GameShell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult, InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {
 	BOARD_WIDTH,
 	Banner,
@@ -274,7 +275,8 @@ export const StackSprintGame = ({
 	);
 
 	const itemColor = useCallback(
-		(item: StackItem): InkColor => (item.kind === 'fix' ? 'green' : 'red'),
+		(item: StackItem): InkColor =>
+			item.kind === 'fix' ? colors.saved : colors.failed,
 		[],
 	);
 	const board = useBoard({

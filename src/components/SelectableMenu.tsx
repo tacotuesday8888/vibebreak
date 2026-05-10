@@ -2,6 +2,7 @@ import {useState} from 'react';
 import type {ReactNode} from 'react';
 import {Box, Text, useInput} from 'ink';
 import type {InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 
 export type MenuOption = {
 	description?: string | string[];
@@ -28,7 +29,7 @@ const optionLabelText = (option: MenuOption, index: number): string => {
 };
 
 export const SelectableMenu = ({
-	accent = 'cyan',
+	accent = colors.brandAlt,
 	footer,
 	header,
 	onCancel,

@@ -96,6 +96,25 @@ export const moveLeft = (position: number): number => Math.max(0, position - 1);
 export const moveRight = (position: number): number =>
 	Math.min(BOARD_WIDTH - 1, position + 1);
 
+export const comboBonus = (combo: number): number =>
+	Math.min(8, Math.floor(combo / 3));
+
+export const pacingLevel = (
+	durationSeconds: number,
+	elapsedMs: number,
+): number => {
+	const durationMs = durationSeconds * 1000;
+	const progress = durationMs === 0 ? 1 : elapsedMs / durationMs;
+
+	return Math.min(3, Math.floor(progress * 4));
+};
+
+export const spawnEveryTicks = (
+	baseInterval: number,
+	durationSeconds: number,
+	elapsedMs: number,
+): number => Math.max(1, baseInterval - pacingLevel(durationSeconds, elapsedMs));
+
 export const timeLeftSeconds = (
 	durationSeconds: number,
 	elapsedMs: number,

@@ -5,8 +5,10 @@ import {
 	BOARD_WIDTH,
 	FallingItem,
 	PLAYER_ROW,
+	comboBonus,
 	moveLeft,
 	moveRight,
+	spawnEveryTicks,
 	timeLeftSeconds,
 	useBoard,
 	useFinishOnce,
@@ -21,7 +23,9 @@ type CommitItem = FallingItem<'bad' | 'good'> & {
 };
 
 type CommitState = {
+	bestCombo: number;
 	catches: number;
+	combo: number;
 	elapsedMs: number;
 	flash: 'bad' | 'good' | null;
 	items: CommitItem[];
@@ -46,6 +50,8 @@ const badItems = [
 
 const initialState = (): CommitState => ({
 	catches: 0,
+	bestCombo: 0,
+	combo: 0,
 	elapsedMs: 0,
 	flash: null,
 	items: [],
@@ -115,7 +121,9 @@ export const CommitCatchGame = ({
 				);
 				const tick = current.tick + 1;
 				const items: CommitItem[] = [];
+				let bestCombo = current.bestCombo;
 				let catches = current.catches;
+				let combo = current.combo;
 				let misses = current.misses;
 				let score = current.score;
 				let message = current.message;
@@ -128,10 +136,18 @@ export const CommitCatchGame = ({
 						score += movedItem.points;
 
 						if (movedItem.kind === 'good') {
+							combo += 1;
+							bestCombo = Math.max(bestCombo, combo);
+							const bonus = comboBonus(combo);
+							score += bonus;
 							catches += 1;
-							message = `+${movedItem.points} caught ${movedItem.label}. Ship it gently.`;
+							message =
+								bonus > 0
+									? `+${movedItem.points + bonus} caught ${movedItem.label}. Combo x${combo}.`
+									: `+${movedItem.points} caught ${movedItem.label}. Ship it gently.`;
 							flash = 'good';
 						} else {
+							combo = 0;
 							misses += 1;
 							message = `${movedItem.points} caught ${movedItem.label}. Oops, spicy diff.`;
 							flash = 'bad';
@@ -143,8 +159,9 @@ export const CommitCatchGame = ({
 					if (movedItem.y > PLAYER_ROW) {
 						if (movedItem.kind === 'good') {
 							score -= 1;
+							combo = 0;
 							misses += 1;
-							message = '-1 useful thing drifted away.';
+							message = '-1 useful thing drifted away. Combo took a nap.';
 							flash = 'bad';
 						}
 
@@ -156,13 +173,24 @@ export const CommitCatchGame = ({
 
 				let nextId = current.nextId;
 
-				if (elapsedMs < definition.durationSeconds * 1000 && tick % SPAWN_EVERY_TICKS === 0) {
+				if (
+					elapsedMs < definition.durationSeconds * 1000 &&
+					tick %
+						spawnEveryTicks(
+							SPAWN_EVERY_TICKS,
+							definition.durationSeconds,
+							elapsedMs,
+						) ===
+						0
+				) {
 					items.push(createItem(nextId));
 					nextId += 1;
 				}
 
 				return {
+					bestCombo,
 					catches,
+					combo,
 					elapsedMs,
 					flash,
 					items,
@@ -190,9 +218,17 @@ export const CommitCatchGame = ({
 			stats: [
 				{label: 'Caught', value: state.catches},
 				{label: 'Oops', value: state.misses},
+				{label: 'Best combo', value: `x${state.bestCombo}`},
 			],
 		}),
-		[definition.id, definition.name, state.catches, state.misses, state.score],
+		[
+			definition.id,
+			definition.name,
+			state.bestCombo,
+			state.catches,
+			state.misses,
+			state.score,
+		],
 	);
 
 	useFinishOnce(
@@ -220,6 +256,7 @@ export const CommitCatchGame = ({
 			score={state.score}
 			status={[
 				{label: 'Time', value: `${timeLeftSeconds(definition.durationSeconds, state.elapsedMs)}s`},
+				{label: 'Combo', value: `x${state.combo}`},
 				{label: 'Caught', value: state.catches},
 				{label: 'Oops', value: state.misses},
 			]}

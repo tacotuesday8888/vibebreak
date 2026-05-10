@@ -92,9 +92,11 @@ vibebreak setup
 
 ## Games
 
-- **Dodge the Bugs**: slide away from falling `🐛` bugs and keep the vibe intact.
-- **Commit Catch**: catch `✓`, `+`, and `☕`; avoid `🐛` and `!`.
-- **Stack Trace Sprint**: grab `FIX` tokens and dodge falling `ERR` blocks.
+Each round is a quick 45-second break with a light difficulty ramp and combo scoring.
+
+- **Dodge the Bugs**: slide away from falling `🐛` bugs, chain dodges, and score extra for near misses.
+- **Commit Catch**: catch `✓`, `+`, and `☕`; avoid `🐛` and `!`; keep your streak alive.
+- **Stack Trace Sprint**: grab `FIX` tokens, dodge `ERR` blocks, and chain clean sidesteps.
 
 ## Controls
 
@@ -147,7 +149,7 @@ npm run build
 - Polished terminal menu
 - Today's Break daily rotation
 - Three tiny mini-games
-- Shared game UI with score, time, best score, feedback messages, and framed boards
+- Shared game UI with score, time, best score, combo streaks, feedback messages, and framed boards
 - Local high scores
 - Optional Codex/Claude session wrapper
 - No backend or external services

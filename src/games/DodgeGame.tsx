@@ -5,8 +5,10 @@ import {
 	BOARD_WIDTH,
 	FallingItem,
 	PLAYER_ROW,
+	comboBonus,
 	moveLeft,
 	moveRight,
+	spawnEveryTicks,
 	timeLeftSeconds,
 	useBoard,
 	useFinishOnce,
@@ -20,6 +22,8 @@ type Bug = FallingItem<'bug'>;
 
 type DodgeState = {
 	bugs: Bug[];
+	combo: number;
+	bestCombo: number;
 	dodges: number;
 	elapsedMs: number;
 	flash: 'bad' | 'good' | null;
@@ -33,6 +37,8 @@ type DodgeState = {
 
 const initialState = (): DodgeState => ({
 	bugs: [],
+	bestCombo: 0,
+	combo: 0,
 	dodges: 0,
 	elapsedMs: 0,
 	flash: null,
@@ -94,6 +100,8 @@ export const DodgeGame = ({
 				let score = current.score;
 				let hits = current.hits;
 				let dodges = current.dodges;
+				let combo = current.combo;
+				let bestCombo = current.bestCombo;
 				let message = current.message;
 				let flash: DodgeState['flash'] = null;
 
@@ -103,15 +111,23 @@ export const DodgeGame = ({
 					if (movedBug.y === PLAYER_ROW && movedBug.x === current.playerX) {
 						score -= 6;
 						hits += 1;
-						message = '-6 bug hug. Deeply unnecessary.';
+						combo = 0;
+						message = '-6 bug hug. Combo composted.';
 						flash = 'bad';
 						continue;
 					}
 
 					if (movedBug.y > PLAYER_ROW) {
-						score += 2;
+						const nearMiss = Math.abs(movedBug.x - current.playerX) === 1;
+						combo += 1;
+						bestCombo = Math.max(bestCombo, combo);
+						const bonus = comboBonus(combo);
+						const points = nearMiss ? 4 + bonus : 2 + bonus;
+						score += points;
 						dodges += 1;
-						message = '+2 clean dodge. The vibe survives.';
+						message = nearMiss
+							? `+${points} near miss. Cozy but alarming.`
+							: `+${points} clean dodge. Combo x${combo}.`;
 						flash = 'good';
 						continue;
 					}
@@ -121,7 +137,16 @@ export const DodgeGame = ({
 
 				let nextId = current.nextId;
 
-				if (elapsedMs < definition.durationSeconds * 1000 && tick % SPAWN_EVERY_TICKS === 0) {
+				if (
+					elapsedMs < definition.durationSeconds * 1000 &&
+					tick %
+						spawnEveryTicks(
+							SPAWN_EVERY_TICKS,
+							definition.durationSeconds,
+							elapsedMs,
+						) ===
+						0
+				) {
 					bugs.push({
 						id: nextId,
 						kind: 'bug',
@@ -133,7 +158,9 @@ export const DodgeGame = ({
 				}
 
 				return {
+					bestCombo,
 					bugs,
+					combo,
 					dodges,
 					elapsedMs,
 					flash,
@@ -161,9 +188,17 @@ export const DodgeGame = ({
 			stats: [
 				{label: 'Dodged', value: state.dodges},
 				{label: 'Hits', value: state.hits},
+				{label: 'Best combo', value: `x${state.bestCombo}`},
 			],
 		}),
-		[definition.id, definition.name, state.dodges, state.hits, state.score],
+		[
+			definition.id,
+			definition.name,
+			state.bestCombo,
+			state.dodges,
+			state.hits,
+			state.score,
+		],
 	);
 
 	useFinishOnce(
@@ -188,6 +223,7 @@ export const DodgeGame = ({
 			score={state.score}
 			status={[
 				{label: 'Time', value: `${timeLeftSeconds(definition.durationSeconds, state.elapsedMs)}s`},
+				{label: 'Combo', value: `x${state.combo}`},
 				{label: 'Dodged', value: state.dodges},
 				{label: 'Hits', value: state.hits},
 			]}

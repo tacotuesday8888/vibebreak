@@ -5,8 +5,10 @@ import {
 	BOARD_WIDTH,
 	FallingItem,
 	PLAYER_ROW,
+	comboBonus,
 	moveLeft,
 	moveRight,
+	spawnEveryTicks,
 	timeLeftSeconds,
 	useBoard,
 	useFinishOnce,
@@ -19,6 +21,8 @@ const SPAWN_EVERY_TICKS = 2;
 type StackItem = FallingItem<'err' | 'fix'>;
 
 type StackState = {
+	bestCombo: number;
+	combo: number;
 	elapsedMs: number;
 	errors: number;
 	fixes: number;
@@ -32,6 +36,8 @@ type StackState = {
 };
 
 const initialState = (): StackState => ({
+	bestCombo: 0,
+	combo: 0,
 	elapsedMs: 0,
 	errors: 0,
 	fixes: 0,
@@ -99,6 +105,8 @@ export const StackSprintGame = ({
 				);
 				const tick = current.tick + 1;
 				const items: StackItem[] = [];
+				let bestCombo = current.bestCombo;
+				let combo = current.combo;
 				let errors = current.errors;
 				let fixes = current.fixes;
 				let score = current.score;
@@ -110,14 +118,18 @@ export const StackSprintGame = ({
 
 					if (movedItem.y === PLAYER_ROW && movedItem.x === current.playerX) {
 						if (movedItem.kind === 'fix') {
-							score += 7;
+							combo += 1;
+							bestCombo = Math.max(bestCombo, combo);
+							const points = 7 + comboBonus(combo);
+							score += points;
 							fixes += 1;
-							message = '+7 FIX collected. Tiny victory confetti.';
+							message = `+${points} FIX collected. Combo x${combo}.`;
 							flash = 'good';
 						} else {
 							score -= 8;
+							combo = 0;
 							errors += 1;
-							message = '-8 ERR bonk. Stack traces are pointy.';
+							message = '-8 ERR bonk. Combo stack overflowed.';
 							flash = 'bad';
 						}
 
@@ -127,11 +139,15 @@ export const StackSprintGame = ({
 					if (movedItem.y > PLAYER_ROW) {
 						if (movedItem.kind === 'fix') {
 							score -= 2;
+							combo = 0;
 							message = '-2 missed FIX. It waved sadly.';
 							flash = 'bad';
 						} else {
-							score += 1;
-							message = '+1 ERR avoided. Very professional.';
+							combo += 1;
+							bestCombo = Math.max(bestCombo, combo);
+							const points = 1 + comboBonus(combo);
+							score += points;
+							message = `+${points} ERR avoided. Smooth little sidestep.`;
 							flash = 'good';
 						}
 
@@ -143,12 +159,23 @@ export const StackSprintGame = ({
 
 				let nextId = current.nextId;
 
-				if (elapsedMs < definition.durationSeconds * 1000 && tick % SPAWN_EVERY_TICKS === 0) {
+				if (
+					elapsedMs < definition.durationSeconds * 1000 &&
+					tick %
+						spawnEveryTicks(
+							SPAWN_EVERY_TICKS,
+							definition.durationSeconds,
+							elapsedMs,
+						) ===
+						0
+				) {
 					items.push(createItem(nextId));
 					nextId += 1;
 				}
 
 				return {
+					bestCombo,
+					combo,
 					elapsedMs,
 					errors,
 					fixes,
@@ -177,9 +204,17 @@ export const StackSprintGame = ({
 			stats: [
 				{label: 'Fixes', value: state.fixes},
 				{label: 'ERR hits', value: state.errors},
+				{label: 'Best combo', value: `x${state.bestCombo}`},
 			],
 		}),
-		[definition.id, definition.name, state.errors, state.fixes, state.score],
+		[
+			definition.id,
+			definition.name,
+			state.bestCombo,
+			state.errors,
+			state.fixes,
+			state.score,
+		],
 	);
 
 	useFinishOnce(
@@ -207,6 +242,7 @@ export const StackSprintGame = ({
 			score={state.score}
 			status={[
 				{label: 'Time', value: `${timeLeftSeconds(definition.durationSeconds, state.elapsedMs)}s`},
+				{label: 'Combo', value: `x${state.combo}`},
 				{label: 'Fixes', value: state.fixes},
 				{label: 'ERR hits', value: state.errors},
 			]}

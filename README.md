@@ -11,7 +11,7 @@
   <img alt="Node.js 22+" src="https://img.shields.io/badge/node-%3E%3D22-67e8f9">
 </p>
 
-Vibebreak is a chaotic-cozy terminal break arcade built with Node.js, TypeScript, Ink, and React. It gives you short 45-second mini-games for coding-session resets, with local high scores and no backend, login, cloud service, AI, payments, analytics, or telemetry.
+Vibebreak is a chaotic-cozy terminal break arcade built with Node.js, TypeScript, Ink, and React. It gives you short 45-second mini-games for tiny brain resets, with local high scores and no backend, login, cloud service, AI, payments, analytics, or telemetry.
 
 The npm package is [`vibebreak-arcade`](https://www.npmjs.com/package/vibebreak-arcade). The unscoped `vibebreak` package name is already taken by an unrelated project.
 
@@ -90,8 +90,6 @@ vibebreak-arcade
 vibebreak-arcade daily
 vibebreak-arcade play <game-id>
 vibebreak-arcade scores
-vibebreak-arcade setup
-vibebreak-arcade agent <codex|claude> [options] -- [args]
 ```
 
 Examples:
@@ -99,8 +97,6 @@ Examples:
 ```bash
 vibebreak-arcade play commit-catch
 vibebreak-arcade play maze-munch
-vibebreak-arcade agent codex --break=start -- "work on the next task"
-vibebreak-arcade agent claude --break=both --threshold=15 -- "fix the tests"
 ```
 
 `daily` chooses the same game for the same local calendar date, so Today's Break rotates without needing the internet.
@@ -113,43 +109,6 @@ vibebreak-arcade agent claude --break=both --threshold=15 -- "fix the tests"
 - Menus: arrow keys or `W`/`S`, then `Enter`
 - Replay: `Enter` or `R`
 - Quit/back: `Q` or `Esc`
-
-## Optional Coding-Agent Breaks
-
-Vibebreak includes a small opt-in wrapper for Codex and Claude. It can offer Today's Break before a coding-agent session starts, after a long session ends, or both.
-
-Nothing is installed automatically. Your normal `codex` and `claude` commands stay untouched unless you choose to add an alias yourself.
-
-Try it without installing Vibebreak globally:
-
-```bash
-npx --yes vibebreak-arcade@latest agent codex --break=start -- "build the feature"
-```
-
-Or, after global install:
-
-```bash
-vibebreak-arcade agent codex --break=start -- "build the feature"
-vibebreak-arcade agent claude --break=end -- "review this repo"
-vibebreak-arcade agent codex --break=both --threshold=20 -- "fix the tests"
-vibebreak-arcade agent claude --break=off -- --help
-```
-
-Break options:
-
-- `--break=start` offers Today's Break before the tool opens.
-- `--break=end` offers Today's Break after a long session. This is the default.
-- `--break=both` offers both.
-- `--break=off` runs the wrapped tool without game prompts.
-- `--threshold=25` controls the end-of-session prompt time in minutes.
-
-To see optional alias setup notes:
-
-```bash
-vibebreak-arcade setup
-```
-
-A single terminal cannot comfortably run an interactive coding agent and an interactive game at the same time. For true side-by-side play, use two terminal panes: run your agent in one and `vibebreak-arcade daily` in the other.
 
 ## Local Scores
 
@@ -197,7 +156,7 @@ Emoji rendering depends on your terminal font. If `🐛` or `☕` look misaligne
 
 ## Project Status
 
-- Latest stable npm release: `vibebreak-arcade@0.3.1`
+- Latest stable npm release: `vibebreak-arcade@0.3.2`
 - Release history: [CHANGELOG.md](CHANGELOG.md)
 - CI: `npm test` and `npm pack --dry-run`
 - License: MIT
@@ -208,6 +167,7 @@ Emoji rendering depends on your terminal font. If `🐛` or `☕` look misaligne
 - More gameplay balancing
 - A short in-app help screen
 - Local score import/export
+- Optional workflow integrations, if a simple version actually makes sense later
 - Optional plain-text mode for terminals with limited emoji support
 
 ## Contributing

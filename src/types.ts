@@ -69,12 +69,3 @@ export type AppCommand =
 	| {kind: 'daily'}
 	| {gameId: GameId; kind: 'play'}
 	| {kind: 'scores'};
-
-export type AgentTool = 'claude' | 'codex';
-
-export type AgentBreakMode = 'both' | 'end' | 'off' | 'start';
-
-export type AgentOptions = {
-	breakMode: AgentBreakMode;
-	thresholdMinutes: number;
-};

@@ -30,19 +30,9 @@ for (const gameId of expectedGameIds) {
 assert.deepEqual(parseCliArgs([]), {kind: 'menu'});
 assert.deepEqual(parseCliArgs(['daily']), {kind: 'daily'});
 assert.deepEqual(parseCliArgs(['scores']), {kind: 'scores'});
-assert.deepEqual(parseCliArgs(['setup']), {kind: 'setup'});
 assert.equal(parseCliArgs(['play']).kind, 'help');
 assert.equal(parseCliArgs(['play', 'missing']).kind, 'help');
-
-assert.deepEqual(
-	parseCliArgs(['agent', 'codex', '--break=both', '--threshold=15', '--', '--help']),
-	{
-		args: ['--help'],
-		kind: 'agent',
-		options: {breakMode: 'both', thresholdMinutes: 15},
-		tool: 'codex',
-	},
-);
+assert.equal(parseCliArgs(['missing']).kind, 'help');
 
 const dailyDate = new Date(2026, 4, 10);
 assert.equal(getLocalDateKey(dailyDate), '2026-05-10');

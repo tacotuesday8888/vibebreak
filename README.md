@@ -4,69 +4,91 @@ Vibebreak is a chaotic-cozy terminal break arcade built with Node.js, TypeScript
 
 Take a tiny reset during a coding session, play a short terminal game, and keep local high scores without any backend, login, cloud service, AI, payments, or analytics.
 
-## Install
+The package is published on npm as [`vibebreak-arcade`](https://www.npmjs.com/package/vibebreak-arcade) (the unscoped `vibebreak` slot is taken by an unrelated project).
 
-Clone the project, then install dependencies:
+## Quickstart
+
+No install required:
 
 ```bash
-npm install
+npx vibebreak-arcade
+```
+
+That opens the main menu. To jump straight into the daily break:
+
+```bash
+npx vibebreak-arcade daily
 ```
 
 Vibebreak uses Ink 7, which requires Node.js 22 or newer.
 
-## Run
+## Install
 
-Open the main menu:
+Install globally so you can run the CLI from anywhere:
 
 ```bash
+npm install --global vibebreak-arcade
+```
+
+Then run:
+
+```bash
+vibebreak-arcade
+vibebreak-arcade daily
+vibebreak-arcade play dodge
+```
+
+Prefer a shorter command? Add an alias to your shell config:
+
+```bash
+alias vibebreak='vibebreak-arcade'
+```
+
+### From source
+
+Clone the repo, install dependencies, and run from source:
+
+```bash
+git clone https://github.com/tacotuesday8888/vibebreak.git
+cd vibebreak
+npm install
 npm start
 ```
 
-Build the CLI:
+You can also run a built version directly:
 
 ```bash
 npm run build
-```
-
-After building, run the compiled CLI directly:
-
-```bash
 node dist/index.js
-```
-
-When installed or linked as a package, Vibebreak exposes the `vibebreak` command:
-
-```bash
-vibebreak
 ```
 
 ## Commands
 
 ```bash
-vibebreak
-vibebreak daily
-vibebreak play dodge
-vibebreak play commit-catch
-vibebreak play stack-sprint
-vibebreak scores
-vibebreak setup
-vibebreak agent codex --break=start -- "work on the next task"
-vibebreak agent codex -- --help
-vibebreak agent claude --break=both -- "fix the tests"
-vibebreak agent claude -- --help
+vibebreak-arcade
+vibebreak-arcade daily
+vibebreak-arcade play dodge
+vibebreak-arcade play commit-catch
+vibebreak-arcade play stack-sprint
+vibebreak-arcade scores
+vibebreak-arcade setup
+vibebreak-arcade agent codex --break=start -- "work on the next task"
+vibebreak-arcade agent codex -- --help
+vibebreak-arcade agent claude --break=both -- "fix the tests"
+vibebreak-arcade agent claude -- --help
 ```
 
-`vibebreak daily` chooses the same game for the same local calendar date, so Today's Break rotates without needing the internet.
+`vibebreak-arcade daily` chooses the same game for the same local calendar date, so Today's Break rotates without needing the internet.
 
-`vibebreak agent <codex|claude> -- [args...]` starts Codex or Claude through Vibebreak. It does not install shell hooks or modify your shell config.
+`vibebreak-arcade agent <codex|claude> -- [args...]` starts Codex or Claude through Vibebreak. It does not install shell hooks or modify your shell config.
 
 Agent break options:
 
 ```bash
-vibebreak agent codex --break=start -- "build the feature"
-vibebreak agent claude --break=end -- "review this repo"
-vibebreak agent codex --break=both --threshold=15 -- "fix the tests"
-vibebreak agent claude --break=off -- --help
+vibebreak-arcade agent codex --break=start -- "build the feature"
+vibebreak-arcade agent claude --break=end -- "review this repo"
+vibebreak-arcade agent codex --break=both --threshold=15 -- "fix the tests"
+vibebreak-arcade agent claude --break=off -- --help
 ```
 
 - `--break=start` offers Today's Break before the tool opens.
@@ -78,16 +100,16 @@ vibebreak agent claude --break=off -- --help
 To make `codex` or `claude` automatically route through Vibebreak, add aliases in your shell config:
 
 ```bash
-alias codex='vibebreak agent codex --break=start --'
-alias claude='vibebreak agent claude --break=start --'
+alias codex='vibebreak-arcade agent codex --break=start --'
+alias claude='vibebreak-arcade agent claude --break=start --'
 ```
 
-A single terminal cannot cleanly show an interactive coding agent and an interactive game at the same time. If you want the agent to work while you play, run the agent in one terminal pane and `vibebreak daily` in another.
+A single terminal cannot cleanly show an interactive coding agent and an interactive game at the same time. If you want the agent to work while you play, run the agent in one terminal pane and `vibebreak-arcade daily` in another.
 
 You can print these setup notes anytime:
 
 ```bash
-vibebreak setup
+vibebreak-arcade setup
 ```
 
 ## Games
@@ -114,6 +136,12 @@ High scores are saved locally at:
 ```
 
 If Vibebreak cannot write that file, the game still works and keeps the score for the current session only.
+
+## Terminal compatibility
+
+Vibebreak uses [Ink](https://github.com/vadimdemedes/ink) and needs an interactive TTY. It works in standard terminals (macOS Terminal, iTerm2, Windows Terminal, GNOME Terminal, kitty, alacritty, etc.). Some sandboxes and CI runners do not provide a real TTY and will fail to start the menu.
+
+Emoji rendering depends on your terminal font. If `🐛` or `☕` look misaligned, try a font with full emoji support such as Fira Code, JetBrains Mono, or your platform's default monospace.
 
 ## Development
 
@@ -146,10 +174,11 @@ npm run build
 
 ## Features
 
-- Polished terminal menu
+- Polished terminal menu with a filled selection bar
 - Today's Break daily rotation
 - Three tiny mini-games
-- Shared game UI with score, time, best score, combo streaks, feedback messages, and framed boards
+- Shared HUD with score, best score, color-tiered combo meter, warming time bar, and floating score popups
+- Bordered end-of-round scorecard with a 5-star rating and a NEW BEST banner
 - Local high scores
 - Optional Codex/Claude session wrapper
 - No backend or external services

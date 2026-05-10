@@ -4,6 +4,9 @@ All notable changes to Vibebreak are documented here.
 
 ## Unreleased
 
+## 0.3.3 - 2026-05-10
+
+- Brightened the live terminal brand colors to better match the GitHub banner.
 - Polished the Choose Game and High Scores terminal screens for clearer scanning.
 
 ## 0.3.2 - 2026-05-10

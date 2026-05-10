@@ -156,7 +156,7 @@ Emoji rendering depends on your terminal font. If `🐛` or `☕` look misaligne
 
 ## Project Status
 
-- Latest stable npm release: `vibebreak-arcade@0.3.2`
+- Latest stable npm release: `vibebreak-arcade@0.3.3`
 - Release history: [CHANGELOG.md](CHANGELOG.md)
 - CI: `npm test` and `npm pack --dry-run`
 - License: MIT

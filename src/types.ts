@@ -16,7 +16,8 @@ export type InkColor =
 	| 'magenta'
 	| 'red'
 	| 'white'
-	| 'yellow';
+	| 'yellow'
+	| `#${string}`;
 
 export type GameMode = 'daily' | 'selected' | 'direct';
 

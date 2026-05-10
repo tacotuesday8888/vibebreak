@@ -8,6 +8,7 @@
     "vibebreak-arcade": "dist/index.js"
   },
   "files": [
+    "assets",
     "dist",
     "scripts",
     "CHANGELOG.md",

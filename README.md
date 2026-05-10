@@ -36,6 +36,7 @@ Then run:
 vibebreak-arcade
 vibebreak-arcade daily
 vibebreak-arcade play dodge
+vibebreak-arcade play snake-bytes
 ```
 
 Prefer a shorter command? Add an alias to your shell config:
@@ -70,6 +71,10 @@ vibebreak-arcade daily
 vibebreak-arcade play dodge
 vibebreak-arcade play commit-catch
 vibebreak-arcade play stack-sprint
+vibebreak-arcade play snake-bytes
+vibebreak-arcade play flap-fix
+vibebreak-arcade play maze-munch
+vibebreak-arcade play bit-stack
 vibebreak-arcade scores
 vibebreak-arcade setup
 vibebreak-arcade agent codex --break=start -- "work on the next task"
@@ -114,15 +119,21 @@ vibebreak-arcade setup
 
 ## Games
 
-Each round is a quick 45-second break with a light difficulty ramp and combo scoring.
+Each round is a quick 45-second break with a light difficulty ramp, combo scoring, score popups, and a compact event log.
 
 - **Dodge the Bugs**: slide away from falling `🐛` bugs, chain dodges, and score extra for near misses.
 - **Commit Catch**: catch `✓`, `+`, and `☕`; avoid `🐛` and `!`; keep your streak alive.
 - **Stack Trace Sprint**: grab `FIX` tokens, dodge `ERR` blocks, and chain clean sidesteps.
+- **Snake Bytes**: steer a tiny command trail, collect `+` and `☕`, and avoid walls or your own tail.
+- **Flap Fix**: tap through deploy pipes, keep the fix airborne, and grab `FIX` tokens.
+- **Maze Munch**: clear dots, drink coffee for temporary power, and turn bugs into bonus points.
+- **Bit Stack**: move and rotate tiny blocks, clear rows, and keep the stack from overflowing.
 
 ## Controls
 
-- Move: `A`/`D` or left/right arrow keys
+- Move: `W`/`A`/`S`/`D` or arrow keys, depending on the game
+- Flap: `Space`, `W`, or up arrow in Flap Fix
+- Rotate/drop: `W`/up and `S`/down in Bit Stack
 - Menus: arrow keys or `W`/`S`, then `Enter`
 - Replay: `Enter` or `R`
 - Quit/back: `Q` or `Esc`
@@ -176,8 +187,9 @@ npm run build
 
 - Polished terminal menu with a filled selection bar
 - Today's Break daily rotation
-- Three tiny mini-games
-- Shared HUD with score, best score, color-tiered combo meter, warming time bar, and floating score popups
+- Seven tiny mini-games, including classic-inspired snake, flap, maze, and block-stacking riffs
+- Shared HUD with objectives, score, best score, status chips, color-tiered combo meter, warming time bar, and floating score popups
+- Combo-tier banners, hit shake, and a two-line event log
 - Bordered end-of-round scorecard with a 5-star rating and a NEW BEST banner
 - Local high scores
 - Optional Codex/Claude session wrapper

@@ -1,6 +1,13 @@
 import type {ReactNode} from 'react';
 
-export type GameId = 'dodge' | 'commit-catch' | 'stack-sprint';
+export type GameId =
+	| 'bit-stack'
+	| 'commit-catch'
+	| 'dodge'
+	| 'flap-fix'
+	| 'maze-munch'
+	| 'snake-bytes'
+	| 'stack-sprint';
 
 export type InkColor =
 	| 'blue'
@@ -52,7 +59,9 @@ export type GameDefinition = {
 	description: string;
 	durationSeconds: number;
 	id: GameId;
+	icon: string;
 	name: string;
+	objective: string;
 };
 
 export type AppCommand =

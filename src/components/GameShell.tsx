@@ -22,6 +22,7 @@ type GameShellProps = {
 	elapsedMs: number;
 	flash?: 'bad' | 'good' | null;
 	message: string;
+	objective: string;
 	prevMessage?: string;
 	score: number;
 	shake?: boolean;
@@ -157,6 +158,23 @@ const TimeBar = ({
 	);
 };
 
+const StatChip = ({
+	accent,
+	label,
+	value,
+}: {
+	accent: InkColor;
+	label: string;
+	value: string | number;
+}) => (
+	<Text>
+		<Text color={accent}>[</Text>
+		<Text dimColor>{label} </Text>
+		<Text bold>{value}</Text>
+		<Text color={accent}>]</Text>
+	</Text>
+);
+
 const renderBannerTopBorder = (
 	dividerWidth: number,
 	banner: ShellBanner | null | undefined,
@@ -189,6 +207,7 @@ export const GameShell = ({
 	elapsedMs,
 	flash = null,
 	message,
+	objective,
 	prevMessage,
 	score,
 	shake = false,
@@ -198,7 +217,6 @@ export const GameShell = ({
 	const rowWidth = (board[0]?.length ?? 0) * CELL_WIDTH;
 	const divider = '─'.repeat(rowWidth + 2);
 	const currentBorderColor = borderColor(flash, accent);
-	const statusText = status.map(item => `${item.label} ${item.value}`).join('  ');
 	const bannerBorder = renderBannerTopBorder(divider.length, banner);
 	const shakeIndent = shake ? ' ' : '';
 
@@ -208,17 +226,25 @@ export const GameShell = ({
 				<Text bold color={accent}>
 					✦ VIBEBREAK // {title}
 				</Text>
+				<Text dimColor>{objective}</Text>
 				<Text>
-					<Text dimColor>Score </Text>
-					<Text bold>{score}</Text>
+					<StatChip accent={accent} label="Score" value={score} />
 					{bestScore === undefined ? null : (
 						<>
 							{'  '}
-							<Text dimColor>Best </Text>
-							{bestScore}
+							<StatChip accent={accent} label="Best" value={bestScore} />
 						</>
 					)}
-					{statusText ? `  ${statusText}` : ''}
+					{status.map(item => (
+						<Text key={item.label}>
+							{'  '}
+							<StatChip
+								accent={accent}
+								label={item.label}
+								value={item.value}
+							/>
+						</Text>
+					))}
 				</Text>
 				<ComboMeter combo={combo} />
 				<TimeBar

@@ -22,6 +22,96 @@ export type FallingItem<TKind extends string> = {
 	y: number;
 };
 
+export type Point = {
+	x: number;
+	y: number;
+};
+
+export type Direction = 'down' | 'left' | 'right' | 'up';
+
+const DIRECTION_DELTAS: Record<Direction, Point> = {
+	down: {x: 0, y: 1},
+	left: {x: -1, y: 0},
+	right: {x: 1, y: 0},
+	up: {x: 0, y: -1},
+};
+
+export const pointKey = (point: Point): string => `${point.x},${point.y}`;
+
+export const samePoint = (first: Point, second: Point): boolean =>
+	first.x === second.x && first.y === second.y;
+
+export const isInsideBoard = (
+	point: Point,
+	width = BOARD_WIDTH,
+	height = BOARD_HEIGHT,
+): boolean =>
+	point.x >= 0 && point.x < width && point.y >= 0 && point.y < height;
+
+export const movePoint = (point: Point, direction: Direction): Point => {
+	const delta = DIRECTION_DELTAS[direction];
+	return {x: point.x + delta.x, y: point.y + delta.y};
+};
+
+export const oppositeDirection = (direction: Direction): Direction => {
+	if (direction === 'up') {
+		return 'down';
+	}
+
+	if (direction === 'down') {
+		return 'up';
+	}
+
+	if (direction === 'left') {
+		return 'right';
+	}
+
+	return 'left';
+};
+
+export const createBoard = (width = BOARD_WIDTH, height = BOARD_HEIGHT): BoardCell[][] =>
+	Array.from({length: height}, () =>
+		Array.from({length: width}, () => ({label: ' '})),
+	);
+
+export const paintCell = (
+	board: BoardCell[][],
+	point: Point,
+	label: string,
+	color?: BoardCell['color'],
+): void => {
+	if (!isInsideBoard(point, board[0]?.length ?? 0, board.length)) {
+		return;
+	}
+
+	board[point.y]![point.x] = {color, label};
+};
+
+export const randomOpenPoint = (
+	width: number,
+	height: number,
+	blocked: Set<string>,
+	fallback: Point,
+): Point => {
+	const open: Point[] = [];
+
+	for (let y = 0; y < height; y += 1) {
+		for (let x = 0; x < width; x += 1) {
+			const point = {x, y};
+
+			if (!blocked.has(pointKey(point))) {
+				open.push(point);
+			}
+		}
+	}
+
+	if (open.length === 0) {
+		return fallback;
+	}
+
+	return open[Math.floor(Math.random() * open.length)]!;
+};
+
 export type PopupKind = 'bad' | 'good';
 
 export type Popup = {
@@ -97,6 +187,45 @@ export const playerColorFor = (flash: FlashKind): InkColor => {
 	}
 
 	return 'white';
+};
+
+export const useDirectionalControls = (
+	onDirection: (direction: Direction) => void,
+	onExit: () => void,
+	onAction?: () => void,
+) => {
+	useInput((input, key) => {
+		const normalizedInput = input.toLowerCase();
+
+		if (normalizedInput === 'q' || key.escape) {
+			onExit();
+			return;
+		}
+
+		if (key.upArrow || normalizedInput === 'w') {
+			onDirection('up');
+			return;
+		}
+
+		if (key.downArrow || normalizedInput === 's') {
+			onDirection('down');
+			return;
+		}
+
+		if (key.leftArrow || normalizedInput === 'a') {
+			onDirection('left');
+			return;
+		}
+
+		if (key.rightArrow || normalizedInput === 'd') {
+			onDirection('right');
+			return;
+		}
+
+		if ((normalizedInput === ' ' || key.return) && onAction) {
+			onAction();
+		}
+	});
 };
 
 // Shake on the very first tick of a bad flash; advanceFlash sets ticksLeft to
@@ -230,9 +359,7 @@ export const useBoard = <TItem extends FallingItem<string>>({
 	popups?: Popup[];
 }): BoardCell[][] =>
 	useMemo(() => {
-		const board: BoardCell[][] = Array.from({length: BOARD_HEIGHT}, () =>
-			Array.from({length: BOARD_WIDTH}, () => ({label: ' '})),
-		);
+		const board = createBoard();
 
 		for (const item of items) {
 			if (

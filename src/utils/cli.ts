@@ -173,6 +173,8 @@ ${games.map(game => `  ${game.id.padEnd(13)} ${game.name}`).join('\n')}
 
 Examples:
   vibebreak-arcade play commit-catch
+  vibebreak-arcade play snake-bytes
+  vibebreak-arcade play bit-stack
   vibebreak-arcade setup
   vibebreak-arcade agent codex -- --help
   vibebreak-arcade agent claude --break=start -- "fix the tests"

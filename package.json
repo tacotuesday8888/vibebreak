@@ -1,11 +1,11 @@
 {
-  "name": "vibebreak",
+  "name": "vibebreak-arcade",
   "version": "0.2.3",
   "description": "A chaotic-cozy terminal break arcade for tiny coding-session resets.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "vibebreak": "dist/index.js"
+    "vibebreak-arcade": "dist/index.js"
   },
   "files": [
     "dist",
@@ -14,14 +14,17 @@
   ],
   "scripts": {
     "build": "tsc",
+    "postbuild": "node scripts/postbuild.mjs",
     "bun:daily": "bun run src/index.tsx daily",
     "bun:start": "bun run src/index.tsx",
     "dev": "tsx watch src/index.tsx",
-    "prepack": "npm run build",
+    "prepare": "npm run build",
     "start": "tsx src/index.tsx",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
+    "arcade",
+    "break",
     "cli",
     "game",
     "ink",
@@ -29,8 +32,16 @@
     "terminal",
     "typescript"
   ],
-  "author": "",
+  "author": "langqi <langqizhao@outlook.com>",
   "license": "MIT",
+  "homepage": "https://github.com/tacotuesday8888/vibebreak#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tacotuesday8888/vibebreak.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tacotuesday8888/vibebreak/issues"
+  },
   "engines": {
     "node": ">=22"
   },

@@ -6,6 +6,8 @@ All notable changes to Vibebreak are documented here.
 
 - Added pull request CI for `npm test` and `npm pack --dry-run`.
 - Added this changelog so releases are easier to scan.
+- Added terminal-style README banner and gameplay preview assets.
+- Reworked the README into a clearer GitHub landing page.
 - Tuned the classic arcade games to be slightly more forgiving.
 
 ## 0.3.1 - 2026-05-10

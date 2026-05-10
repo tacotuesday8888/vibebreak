@@ -1,0 +1,347 @@
+import {useCallback, useMemo, useState} from 'react';
+import {Box, Text, useApp, useInput} from 'ink';
+import {getBestScore, getScoresPath, readScores, recordScore, sortScores} from '../utils/scores.js';
+import {formatDateTime} from '../utils/format.js';
+import {getDailyGame} from '../utils/daily.js';
+import {getGameById, games} from '../games/registry.js';
+import type {
+	AppCommand,
+	GameDefinition,
+	GameId,
+	GameMode,
+	GameResult,
+	ScoreEntry,
+	ScoreWriteResult,
+} from '../types.js';
+import {SelectableMenu} from './SelectableMenu.js';
+
+type Screen =
+	| {name: 'choose'}
+	| {name: 'finished'; result: GameResult; scoreWrite: ScoreWriteResult}
+	| {mode: GameMode; name: 'playing'; gameId: GameId}
+	| {name: 'menu'}
+	| {name: 'scores'};
+
+type AppProps = {
+	initialCommand?: AppCommand;
+};
+
+const initialScreenFromCommand = (command: AppCommand): Screen => {
+	if (command.kind === 'daily') {
+		return {gameId: getDailyGame(games).id, mode: 'daily', name: 'playing'};
+	}
+
+	if (command.kind === 'play') {
+		return {gameId: command.gameId, mode: 'direct', name: 'playing'};
+	}
+
+	if (command.kind === 'scores') {
+		return {name: 'scores'};
+	}
+
+	return {name: 'menu'};
+};
+
+const MainMenu = ({
+	dailyGame,
+	onChooseGame,
+	onQuit,
+	onScores,
+	onStartDaily,
+}: {
+	dailyGame: GameDefinition;
+	onChooseGame: () => void;
+	onQuit: () => void;
+	onScores: () => void;
+	onStartDaily: () => void;
+}) => (
+	<SelectableMenu
+		accent="magenta"
+		footer="Use arrows or W/S, Enter to choose, Q to quit."
+		onCancel={onQuit}
+		options={[
+			{
+				description: `Today: ${dailyGame.name}`,
+				label: "Play Today's Break",
+				onSelect: onStartDaily,
+			},
+			{
+				description: 'Pick from the cozy chaos arcade.',
+				label: 'Choose Game',
+				onSelect: onChooseGame,
+			},
+			{
+				description: 'Local best scores from this machine.',
+				label: 'High Scores',
+				onSelect: onScores,
+			},
+			{label: 'Quit', onSelect: onQuit},
+		]}
+		subtitle="Tiny games for when your brain needs a stretch."
+		title="Vibebreak ✦ cozy chaos arcade"
+	/>
+);
+
+const ChooseGameScreen = ({
+	onBack,
+	onPlay,
+}: {
+	onBack: () => void;
+	onPlay: (gameId: GameId) => void;
+}) => (
+	<SelectableMenu
+		accent="cyan"
+		onCancel={onBack}
+		options={games.map(game => ({
+			description: game.description,
+			label: game.name,
+			onSelect: () => {
+				onPlay(game.id);
+			},
+		}))}
+		subtitle="Each round is short, local, and mildly ridiculous."
+		title="Choose Game"
+	/>
+);
+
+const ScoresScreen = ({
+	onBack,
+	scores,
+}: {
+	onBack: () => void;
+	scores: ScoreEntry[];
+}) => {
+	useInput((input, key) => {
+		const normalizedInput = input.toLowerCase();
+
+		if (key.return || key.escape || normalizedInput === 'q') {
+			onBack();
+		}
+	});
+
+	return (
+		<Box flexDirection="column" gap={1}>
+			<Box flexDirection="column">
+				<Text bold color="yellow">
+					High Scores
+				</Text>
+				<Text dimColor>{getScoresPath()}</Text>
+			</Box>
+
+			{games.map(game => {
+				const topScores = sortScores(
+					scores.filter(score => score.gameId === game.id),
+				).slice(0, 5);
+
+				return (
+					<Box key={game.id} flexDirection="column">
+						<Text bold color={game.accent}>
+							{game.name}
+						</Text>
+						{topScores.length === 0 ? (
+							<Text dimColor>  No scores yet.</Text>
+						) : (
+							topScores.map((score, index) => (
+								<Text key={`${score.playedAt}-${index}`}>
+									{String(index + 1).padStart(2, ' ')}. {score.score}  ·{' '}
+									{score.mode} · {formatDateTime(score.playedAt)}
+								</Text>
+							))
+						)}
+					</Box>
+				);
+			})}
+
+			<Text dimColor>Press Enter or Q to return.</Text>
+		</Box>
+	);
+};
+
+const FinalScreen = ({
+	onMenu,
+	onQuit,
+	onRestart,
+	onScores,
+	result,
+	scoreWrite,
+}: {
+	onMenu: () => void;
+	onQuit: () => void;
+	onRestart: () => void;
+	onScores: () => void;
+	result: GameResult;
+	scoreWrite: ScoreWriteResult;
+}) => {
+	useInput((input, key) => {
+		const normalizedInput = input.toLowerCase();
+
+		if (key.return || normalizedInput === 'r') {
+			onRestart();
+			return;
+		}
+
+		if (normalizedInput === 'm') {
+			onMenu();
+			return;
+		}
+
+		if (normalizedInput === 's') {
+			onScores();
+			return;
+		}
+
+		if (normalizedInput === 'q' || key.escape) {
+			onQuit();
+		}
+	});
+
+	return (
+		<Box flexDirection="column" gap={1}>
+			<Box flexDirection="column">
+				<Text bold color="magenta">
+					Break complete ✦
+				</Text>
+				<Text>
+					{result.gameName} score: <Text bold>{result.score}</Text>
+				</Text>
+				<Text color="yellow">{result.message}</Text>
+			</Box>
+
+			<Box flexDirection="column">
+				{result.stats.map(stat => (
+					<Text key={stat.label}>
+						{stat.label}: {stat.value}
+					</Text>
+				))}
+			</Box>
+
+			<Text color={scoreWrite.saved ? 'green' : 'red'}>
+				{scoreWrite.saved
+					? 'Saved to local high scores.'
+					: 'Could not save locally; keeping this score for the session.'}
+			</Text>
+			{scoreWrite.error ? <Text dimColor>{scoreWrite.error}</Text> : null}
+
+			<Text dimColor>
+				Enter/R replay · M menu · S scores · Q quit
+			</Text>
+		</Box>
+	);
+};
+
+export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
+	const {exit} = useApp();
+	const [initialScreen] = useState<Screen>(() =>
+		initialScreenFromCommand(initialCommand),
+	);
+	const [scores, setScores] = useState<ScoreEntry[]>(() => readScores());
+	const [screen, setScreen] = useState<Screen>(() => initialScreen);
+	const [lastGame, setLastGame] = useState<{
+		gameId: GameId;
+		mode: GameMode;
+	} | null>(() =>
+		initialScreen.name === 'playing'
+			? {gameId: initialScreen.gameId, mode: initialScreen.mode}
+			: null,
+	);
+	const dailyGame = useMemo(() => getDailyGame(games), []);
+
+	const startGame = useCallback((gameId: GameId, mode: GameMode) => {
+		setLastGame({gameId, mode});
+		setScreen({gameId, mode, name: 'playing'});
+	}, []);
+
+	const finishGame = useCallback(
+		(result: GameResult) => {
+			const mode = lastGame?.mode ?? 'selected';
+			const scoreWrite = recordScore({
+				gameId: result.gameId,
+				gameName: result.gameName,
+				mode,
+				playedAt: new Date().toISOString(),
+				score: result.score,
+			});
+
+			setScores(scoreWrite.scores);
+			setScreen({name: 'finished', result, scoreWrite});
+		},
+		[lastGame?.mode],
+	);
+
+	if (screen.name === 'playing') {
+		const game = getGameById(screen.gameId) ?? dailyGame;
+		const GameComponent = game.component;
+
+		return (
+			<GameComponent
+				bestScore={getBestScore(scores, game.id)}
+				definition={game}
+				onExit={() => {
+					setScreen({name: 'menu'});
+				}}
+				onFinish={finishGame}
+			/>
+		);
+	}
+
+	if (screen.name === 'choose') {
+		return (
+			<ChooseGameScreen
+				onBack={() => {
+					setScreen({name: 'menu'});
+				}}
+				onPlay={gameId => {
+					startGame(gameId, 'selected');
+				}}
+			/>
+		);
+	}
+
+	if (screen.name === 'scores') {
+		return (
+			<ScoresScreen
+				onBack={() => {
+					setScreen({name: 'menu'});
+				}}
+				scores={scores}
+			/>
+		);
+	}
+
+	if (screen.name === 'finished') {
+		return (
+			<FinalScreen
+				onMenu={() => {
+					setScreen({name: 'menu'});
+				}}
+				onQuit={exit}
+				onRestart={() => {
+					if (lastGame) {
+						startGame(lastGame.gameId, lastGame.mode);
+					}
+				}}
+				onScores={() => {
+					setScreen({name: 'scores'});
+				}}
+				result={screen.result}
+				scoreWrite={screen.scoreWrite}
+			/>
+		);
+	}
+
+	return (
+		<MainMenu
+			dailyGame={dailyGame}
+			onChooseGame={() => {
+				setScreen({name: 'choose'});
+			}}
+			onQuit={exit}
+			onScores={() => {
+				setScreen({name: 'scores'});
+			}}
+			onStartDaily={() => {
+				startGame(dailyGame.id, 'daily');
+			}}
+		/>
+	);
+};

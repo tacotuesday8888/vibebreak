@@ -112,9 +112,11 @@ vibebreak-arcade agent claude --break=both --threshold=15 -- "fix the tests"
 - Replay: `Enter` or `R`
 - Quit/back: `Q` or `Esc`
 
-## Coding-Agent Breaks
+## Optional Coding-Agent Breaks
 
-Vibebreak can wrap Codex or Claude and offer a break before or after a session. It does not install shell hooks or modify your shell config by itself.
+Vibebreak includes a small opt-in wrapper for Codex and Claude. It can offer Today's Break before a coding-agent session starts, after a long session ends, or both.
+
+Nothing is installed automatically. Your normal `codex` and `claude` commands stay untouched unless you choose to add an alias yourself.
 
 ```bash
 vibebreak-arcade agent codex --break=start -- "build the feature"
@@ -131,13 +133,13 @@ Break options:
 - `--break=off` runs the wrapped tool without game prompts.
 - `--threshold=25` controls the end-of-session prompt time in minutes.
 
-To route `codex` or `claude` through Vibebreak automatically, print setup notes:
+To see optional alias setup notes:
 
 ```bash
 vibebreak-arcade setup
 ```
 
-A single terminal cannot comfortably run an interactive coding agent and an interactive game at the same time. For true parallel play, use two terminal panes: run your agent in one and `vibebreak-arcade daily` in the other.
+A single terminal cannot comfortably run an interactive coding agent and an interactive game at the same time. For true side-by-side play, use two terminal panes: run your agent in one and `vibebreak-arcade daily` in the other.
 
 ## Local Scores
 

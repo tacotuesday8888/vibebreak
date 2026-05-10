@@ -3,18 +3,23 @@ import {GameShell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult, InkColor} from '../types.js';
 import {
 	BOARD_WIDTH,
+	Banner,
 	FallingItem,
 	FlashKind,
 	PLAYER_ROW,
 	Popup,
+	advanceBanner,
 	advanceFlash,
 	advancePopups,
+	comboBannerFor,
 	comboBonus,
 	createPopup,
 	moveLeft,
 	moveRight,
 	playerColorFor,
 	playerSpriteFor,
+	pushMessage,
+	shouldShake,
 	spawnEveryTicks,
 	useBoard,
 	useFinishOnce,
@@ -27,6 +32,7 @@ const SPAWN_EVERY_TICKS = 3;
 type Bug = FallingItem<'bug'>;
 
 type DodgeState = {
+	banner: Banner | null;
 	bugs: Bug[];
 	combo: number;
 	bestCombo: number;
@@ -40,11 +46,13 @@ type DodgeState = {
 	nextPopupId: number;
 	playerX: number;
 	popups: Popup[];
+	prevMessage: string;
 	score: number;
 	tick: number;
 };
 
 const initialState = (): DodgeState => ({
+	banner: null,
 	bugs: [],
 	bestCombo: 0,
 	combo: 0,
@@ -58,6 +66,7 @@ const initialState = (): DodgeState => ({
 	nextPopupId: 1,
 	playerX: Math.floor(BOARD_WIDTH / 2),
 	popups: [],
+	prevMessage: '',
 	score: 0,
 	tick: 0,
 });
@@ -182,8 +191,15 @@ export const DodgeGame = ({
 					current.flashTicksLeft,
 					newFlash,
 				);
+				const banner =
+					comboBannerFor(current.combo, combo) ?? advanceBanner(current.banner);
+				const log = pushMessage(
+					{message: current.message, prevMessage: current.prevMessage},
+					message,
+				);
 
 				return {
+					banner,
 					bestCombo,
 					bugs,
 					combo,
@@ -192,11 +208,12 @@ export const DodgeGame = ({
 					flash,
 					flashTicksLeft,
 					hits,
-					message,
+					message: log.message,
 					nextId,
 					nextPopupId,
 					playerX: current.playerX,
 					popups,
+					prevMessage: log.prevMessage,
 					score,
 					tick,
 				};
@@ -249,6 +266,7 @@ export const DodgeGame = ({
 	return (
 		<GameShell
 			accent={definition.accent}
+			banner={state.banner}
 			bestScore={bestScore}
 			board={board}
 			combo={state.combo}
@@ -257,7 +275,9 @@ export const DodgeGame = ({
 			elapsedMs={state.elapsedMs}
 			flash={state.flash}
 			message={state.message}
+			prevMessage={state.prevMessage}
 			score={state.score}
+			shake={shouldShake(state.flash, state.flashTicksLeft)}
 			status={[
 				{label: 'Dodged', value: state.dodges},
 				{label: 'Hits', value: state.hits},

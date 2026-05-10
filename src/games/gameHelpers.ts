@@ -99,6 +99,80 @@ export const playerColorFor = (flash: FlashKind): InkColor => {
 	return 'white';
 };
 
+// Shake on the very first tick of a bad flash; advanceFlash sets ticksLeft to
+// 2 when a new flash starts, so that uniquely identifies the moment of impact.
+export const shouldShake = (flash: FlashKind, flashTicksLeft: number): boolean =>
+	flash === 'bad' && flashTicksLeft === 2;
+
+export type Banner = {
+	color: InkColor;
+	text: string;
+	ticksLeft: number;
+};
+
+const BANNER_TICKS_TO_LIVE = 6;
+
+const COMBO_BANNERS: Array<{
+	color: InkColor;
+	text: string;
+	threshold: number;
+}> = [
+	{color: 'cyan', text: 'TIDY!', threshold: 3},
+	{color: 'magenta', text: 'CRISP!', threshold: 6},
+	{color: 'yellow', text: 'VIBE WAVE!', threshold: 10},
+];
+
+export const comboBannerFor = (
+	previousCombo: number,
+	nextCombo: number,
+): Banner | null => {
+	// Walk thresholds high-to-low so a single tick can only emit the highest
+	// banner it just unlocked, not all of them.
+	for (let index = COMBO_BANNERS.length - 1; index >= 0; index -= 1) {
+		const tier = COMBO_BANNERS[index]!;
+
+		if (previousCombo < tier.threshold && nextCombo >= tier.threshold) {
+			return {
+				color: tier.color,
+				text: tier.text,
+				ticksLeft: BANNER_TICKS_TO_LIVE,
+			};
+		}
+	}
+
+	return null;
+};
+
+export const advanceBanner = (banner: Banner | null): Banner | null => {
+	if (!banner) {
+		return null;
+	}
+
+	const ticksLeft = banner.ticksLeft - 1;
+
+	if (ticksLeft <= 0) {
+		return null;
+	}
+
+	return {...banner, ticksLeft};
+};
+
+export type MessageLog = {
+	message: string;
+	prevMessage: string;
+};
+
+export const pushMessage = (
+	current: MessageLog,
+	newMessage: string,
+): MessageLog => {
+	if (newMessage === current.message) {
+		return current;
+	}
+
+	return {message: newMessage, prevMessage: current.message};
+};
+
 export const useHorizontalControls = (
 	onMoveLeft: () => void,
 	onMoveRight: () => void,

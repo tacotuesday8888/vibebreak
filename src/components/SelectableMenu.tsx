@@ -99,10 +99,10 @@ export const SelectableMenu = ({
 						<Box key={option.label} flexDirection="column">
 							{isSelected ? (
 								<Text backgroundColor={accent} bold color="black">
-									{` › ${paddedLabel} `}
+									{` ▸ ${paddedLabel}  `}
 								</Text>
 							) : (
-								<Text>{`   ${paddedLabel} `}</Text>
+								<Text>{`   ${paddedLabel}  `}</Text>
 							)}
 							{option.description ? (
 								<Text dimColor>     {option.description}</Text>

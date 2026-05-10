@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Box, Text} from 'ink';
 import type {InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {VERSION} from '../utils/version.js';
 
 type LogoProps = {
@@ -23,12 +24,12 @@ type RowStyle = {
 };
 
 const WORDMARK_STYLES: RowStyle[] = [
-	{color: 'cyan'},
-	{color: 'cyan'},
-	{bold: true, color: 'cyan'},
-	{bold: true, color: 'magenta'},
-	{color: 'magenta'},
-	{color: 'magenta', dim: true},
+	{color: colors.brandAlt},
+	{color: colors.brandAlt},
+	{bold: true, color: colors.brandAlt},
+	{bold: true, color: colors.brand},
+	{color: colors.brand},
+	{color: colors.brand, dim: true},
 ];
 
 type PetFrame = {
@@ -55,7 +56,7 @@ const PET_FRAMES: PetFrame[] = [
 	},
 ];
 
-const PET_FRAME_MS = 700;
+const PET_FRAME_MS = 1000;
 
 const usePetFrame = (): PetFrame => {
 	const [index, setIndex] = useState(0);
@@ -96,11 +97,11 @@ export const Logo = ({dailyGameName}: LogoProps) => {
 
 			<Box flexDirection="column">
 				<Text>
-					<Text bold color="yellow">
+					<Text bold color={colors.accent}>
 						tiny chaos arcade
 					</Text>
 					<Text dimColor>{'  ✦  '}</Text>
-					<Text color="magenta">{`v${VERSION}`}</Text>
+					<Text color={colors.brand}>{`v${VERSION}`}</Text>
 				</Text>
 				<Text dimColor>take a 45-second break, then back to coding.</Text>
 			</Box>
@@ -108,14 +109,14 @@ export const Logo = ({dailyGameName}: LogoProps) => {
 			<Box gap={3}>
 				<Box flexDirection="column">
 					{pet.rows.map((row, index) => (
-						<Text key={index} color="yellow">
+						<Text key={index} color={colors.accent}>
 							{row}
 						</Text>
 					))}
 				</Box>
 
 				<Box flexDirection="column">
-					<Text color="cyan">✦ today's break</Text>
+					<Text color={colors.brandAlt}>✦ today's break</Text>
 					<Text bold>{dailyGameName}</Text>
 					<Text dimColor>45 seconds · local high scores</Text>
 				</Box>

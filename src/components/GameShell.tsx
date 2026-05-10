@@ -142,12 +142,12 @@ const TimeBar = ({
 	const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
 	const color = timeColor(remainingMs, durationMs);
 	const isCritical = remainingMs > 0 && remainingMs <= 5000;
-	const blinkDim = isCritical && Math.floor(elapsedMs / 250) % 2 === 1;
+	const blinkDim = isCritical && Math.floor(elapsedMs / 500) % 2 === 1;
 
 	return (
 		<Text>
 			<Text dimColor>Time </Text>
-			<Text bold={isCritical} color={color}>
+			<Text color={color}>
 				{remainingSec}s
 			</Text>{' '}
 			<Text color={color} dimColor={blinkDim}>

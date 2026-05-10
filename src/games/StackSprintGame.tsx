@@ -4,12 +4,18 @@ import type {GameComponentProps, GameResult, InkColor} from '../types.js';
 import {
 	BOARD_WIDTH,
 	FallingItem,
+	FlashKind,
 	PLAYER_ROW,
+	Popup,
+	advanceFlash,
+	advancePopups,
 	comboBonus,
+	createPopup,
 	moveLeft,
 	moveRight,
+	playerColorFor,
+	playerSpriteFor,
 	spawnEveryTicks,
-	timeLeftSeconds,
 	useBoard,
 	useFinishOnce,
 	useHorizontalControls,
@@ -26,11 +32,14 @@ type StackState = {
 	elapsedMs: number;
 	errors: number;
 	fixes: number;
-	flash: 'bad' | 'good' | null;
+	flash: FlashKind;
+	flashTicksLeft: number;
 	items: StackItem[];
 	message: string;
 	nextId: number;
+	nextPopupId: number;
 	playerX: number;
+	popups: Popup[];
 	score: number;
 	tick: number;
 };
@@ -42,10 +51,13 @@ const initialState = (): StackState => ({
 	errors: 0,
 	fixes: 0,
 	flash: null,
+	flashTicksLeft: 0,
 	items: [],
 	message: 'Grab FIX. Let ERR fall anywhere else.',
 	nextId: 1,
+	nextPopupId: 1,
 	playerX: Math.floor(BOARD_WIDTH / 2),
+	popups: [],
 	score: 0,
 	tick: 0,
 });
@@ -105,13 +117,15 @@ export const StackSprintGame = ({
 				);
 				const tick = current.tick + 1;
 				const items: StackItem[] = [];
+				const newPopups: Popup[] = [];
+				let nextPopupId = current.nextPopupId;
 				let bestCombo = current.bestCombo;
 				let combo = current.combo;
 				let errors = current.errors;
 				let fixes = current.fixes;
 				let score = current.score;
 				let message = current.message;
-				let flash: StackState['flash'] = null;
+				let newFlash: FlashKind = null;
 
 				for (const item of current.items) {
 					const movedItem = {...item, y: item.y + 1};
@@ -124,13 +138,18 @@ export const StackSprintGame = ({
 							score += points;
 							fixes += 1;
 							message = `+${points} FIX collected. Combo x${combo}.`;
-							flash = 'good';
+							newFlash = 'good';
+							newPopups.push(createPopup(nextPopupId, points, current.playerX));
+							nextPopupId += 1;
 						} else {
-							score -= 8;
+							const delta = -8;
+							score += delta;
 							combo = 0;
 							errors += 1;
 							message = '-8 ERR bonk. Combo stack overflowed.';
-							flash = 'bad';
+							newFlash = 'bad';
+							newPopups.push(createPopup(nextPopupId, delta, current.playerX));
+							nextPopupId += 1;
 						}
 
 						continue;
@@ -141,14 +160,18 @@ export const StackSprintGame = ({
 							score -= 2;
 							combo = 0;
 							message = '-2 missed FIX. It waved sadly.';
-							flash = 'bad';
+							newFlash = 'bad';
+							newPopups.push(createPopup(nextPopupId, -2, movedItem.x));
+							nextPopupId += 1;
 						} else {
 							combo += 1;
 							bestCombo = Math.max(bestCombo, combo);
 							const points = 1 + comboBonus(combo);
 							score += points;
 							message = `+${points} ERR avoided. Smooth little sidestep.`;
-							flash = 'good';
+							newFlash = 'good';
+							newPopups.push(createPopup(nextPopupId, points, movedItem.x));
+							nextPopupId += 1;
 						}
 
 						continue;
@@ -173,6 +196,13 @@ export const StackSprintGame = ({
 					nextId += 1;
 				}
 
+				const popups = [...advancePopups(current.popups), ...newPopups];
+				const {flash, flashTicksLeft} = advanceFlash(
+					current.flash,
+					current.flashTicksLeft,
+					newFlash,
+				);
+
 				return {
 					bestCombo,
 					combo,
@@ -180,10 +210,13 @@ export const StackSprintGame = ({
 					errors,
 					fixes,
 					flash,
+					flashTicksLeft,
 					items,
 					message,
 					nextId,
+					nextPopupId,
 					playerX: current.playerX,
+					popups,
 					score,
 					tick,
 				};
@@ -227,13 +260,21 @@ export const StackSprintGame = ({
 		(item: StackItem): InkColor => (item.kind === 'fix' ? 'green' : 'red'),
 		[],
 	);
-	const board = useBoard({itemColor, items: state.items, playerX: state.playerX});
+	const board = useBoard({
+		itemColor,
+		items: state.items,
+		playerColor: playerColorFor(state.flash),
+		playerLabel: playerSpriteFor(state.flash),
+		playerX: state.playerX,
+		popups: state.popups,
+	});
 
 	return (
 		<GameShell
 			accent={definition.accent}
 			bestScore={bestScore}
 			board={board}
+			combo={state.combo}
 			controls={definition.controls}
 			durationSeconds={definition.durationSeconds}
 			elapsedMs={state.elapsedMs}
@@ -241,8 +282,6 @@ export const StackSprintGame = ({
 			message={state.message}
 			score={state.score}
 			status={[
-				{label: 'Time', value: `${timeLeftSeconds(definition.durationSeconds, state.elapsedMs)}s`},
-				{label: 'Combo', value: `x${state.combo}`},
 				{label: 'Fixes', value: state.fixes},
 				{label: 'ERR hits', value: state.errors},
 			]}

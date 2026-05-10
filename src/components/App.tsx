@@ -10,6 +10,7 @@ import type {
 	GameId,
 	GameMode,
 	GameResult,
+	InkColor,
 	ScoreEntry,
 	ScoreWriteResult,
 } from '../types.js';
@@ -18,7 +19,12 @@ import {SelectableMenu} from './SelectableMenu.js';
 
 type Screen =
 	| {name: 'choose'}
-	| {name: 'finished'; result: GameResult; scoreWrite: ScoreWriteResult}
+	| {
+			name: 'finished';
+			priorBest: number | undefined;
+			result: GameResult;
+			scoreWrite: ScoreWriteResult;
+	  }
 	| {mode: GameMode; name: 'playing'; gameId: GameId}
 	| {name: 'menu'}
 	| {name: 'scores'};
@@ -163,11 +169,66 @@ const ScoresScreen = ({
 	);
 };
 
+const SCORECARD_INNER_WIDTH = 36;
+
+const padToInner = (visibleLength: number): string =>
+	' '.repeat(Math.max(0, SCORECARD_INNER_WIDTH - visibleLength));
+
+const computeStars = (score: number, priorBest: number | undefined): number => {
+	if (score < 0) {
+		return 1;
+	}
+
+	if (priorBest === undefined || priorBest <= 0) {
+		if (score >= 60) {
+			return 5;
+		}
+
+		if (score >= 35) {
+			return 4;
+		}
+
+		if (score >= 18) {
+			return 3;
+		}
+
+		if (score >= 5) {
+			return 2;
+		}
+
+		return 1;
+	}
+
+	if (score > priorBest) {
+		return 5;
+	}
+
+	const ratio = score / priorBest;
+
+	if (ratio >= 0.9) {
+		return 4;
+	}
+
+	if (ratio >= 0.7) {
+		return 3;
+	}
+
+	if (ratio >= 0.5) {
+		return 2;
+	}
+
+	return 1;
+};
+
+const renderStars = (stars: number): string =>
+	'★'.repeat(stars) + '☆'.repeat(Math.max(0, 5 - stars));
+
 const FinalScreen = ({
 	onMenu,
 	onQuit,
 	onRestart,
 	onScores,
+	priorBest,
 	result,
 	scoreWrite,
 }: {
@@ -175,6 +236,7 @@ const FinalScreen = ({
 	onQuit: () => void;
 	onRestart: () => void;
 	onScores: () => void;
+	priorBest: number | undefined;
 	result: GameResult;
 	scoreWrite: ScoreWriteResult;
 }) => {
@@ -201,32 +263,93 @@ const FinalScreen = ({
 		}
 	});
 
+	const game = getGameById(result.gameId);
+	const accent: InkColor = game?.accent ?? 'magenta';
+	const stars = computeStars(result.score, priorBest);
+	const starsText = renderStars(stars);
+	const isNewBest =
+		priorBest === undefined ? result.score > 0 : result.score > priorBest;
+	const divider = '─'.repeat(SCORECARD_INNER_WIDTH + 2);
+	const gameNamePad = padToInner(result.gameName.length);
+	const scoreLineVisible =
+		priorBest === undefined
+			? `Score ${result.score}`
+			: `Score ${result.score}  Best ${priorBest}`;
+	const scoreLinePad = padToInner(scoreLineVisible.length);
+	const starsPad = padToInner(starsText.length);
+
 	return (
 		<Box flexDirection="column" gap={1}>
 			<Box flexDirection="column">
+				{isNewBest ? (
+					<Text bold color="yellow">
+						✦ NEW BEST ✦
+					</Text>
+				) : null}
 				<Text bold color="magenta">
 					Break complete ✦
 				</Text>
-				<Text>
-					{result.gameName} score: <Text bold>{result.score}</Text>
-				</Text>
-				<Text color="yellow">{result.message}</Text>
 			</Box>
 
 			<Box flexDirection="column">
-				{result.stats.map(stat => (
-					<Text key={stat.label}>
-						{stat.label}: {stat.value}
+				<Text color={accent}>╭{divider}╮</Text>
+				<Text color={accent}>
+					{'│ '}
+					<Text bold color="white">
+						{result.gameName}
 					</Text>
-				))}
+					{gameNamePad}
+					{' │'}
+				</Text>
+				<Text color={accent}>
+					{'│ '}
+					<Text dimColor>Score </Text>
+					<Text bold color="white">
+						{result.score}
+					</Text>
+					{priorBest === undefined ? null : (
+						<>
+							<Text dimColor>{'  Best '}</Text>
+							<Text color="white">{priorBest}</Text>
+						</>
+					)}
+					{scoreLinePad}
+					{' │'}
+				</Text>
+				<Text color={accent}>
+					{'│ '}
+					<Text bold color="yellow">
+						{starsText}
+					</Text>
+					{starsPad}
+					{' │'}
+				</Text>
+				{result.stats.map(stat => {
+					const text = `${stat.label} ${stat.value}`;
+					const pad = padToInner(text.length);
+					return (
+						<Text key={stat.label} color={accent}>
+							{'│ '}
+							<Text dimColor>{stat.label} </Text>
+							<Text color="white">{stat.value}</Text>
+							{pad}
+							{' │'}
+						</Text>
+					);
+				})}
+				<Text color={accent}>╰{divider}╯</Text>
 			</Box>
 
-			<Text color={scoreWrite.saved ? 'green' : 'red'}>
-				{scoreWrite.saved
-					? 'Saved to local high scores.'
-					: 'Could not save locally; keeping this score for the session.'}
-			</Text>
-			{scoreWrite.error ? <Text dimColor>{scoreWrite.error}</Text> : null}
+			<Text color="yellow">{result.message}</Text>
+
+			<Box flexDirection="column">
+				<Text color={scoreWrite.saved ? 'green' : 'red'}>
+					{scoreWrite.saved
+						? 'Saved to local high scores.'
+						: 'Could not save locally; keeping this score for the session.'}
+				</Text>
+				{scoreWrite.error ? <Text dimColor>{scoreWrite.error}</Text> : null}
+			</Box>
 
 			<Text dimColor>
 				Enter/R replay · M menu · S scores · Q quit
@@ -260,6 +383,7 @@ export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
 	const finishGame = useCallback(
 		(result: GameResult) => {
 			const mode = lastGame?.mode ?? 'selected';
+			const priorBest = getBestScore(scores, result.gameId);
 			const scoreWrite = recordScore({
 				gameId: result.gameId,
 				gameName: result.gameName,
@@ -269,9 +393,9 @@ export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
 			});
 
 			setScores(scoreWrite.scores);
-			setScreen({name: 'finished', result, scoreWrite});
+			setScreen({name: 'finished', priorBest, result, scoreWrite});
 		},
-		[lastGame?.mode],
+		[lastGame?.mode, scores],
 	);
 
 	if (screen.name === 'playing') {
@@ -329,6 +453,7 @@ export const App = ({initialCommand = {kind: 'menu'}}: AppProps) => {
 				onScores={() => {
 					setScreen({name: 'scores'});
 				}}
+				priorBest={screen.priorBest}
 				result={screen.result}
 				scoreWrite={screen.scoreWrite}
 			/>

@@ -4,12 +4,18 @@ import type {GameComponentProps, GameResult, InkColor} from '../types.js';
 import {
 	BOARD_WIDTH,
 	FallingItem,
+	FlashKind,
 	PLAYER_ROW,
+	Popup,
+	advanceFlash,
+	advancePopups,
 	comboBonus,
+	createPopup,
 	moveLeft,
 	moveRight,
+	playerColorFor,
+	playerSpriteFor,
 	spawnEveryTicks,
-	timeLeftSeconds,
 	useBoard,
 	useFinishOnce,
 	useHorizontalControls,
@@ -26,11 +32,14 @@ type DodgeState = {
 	bestCombo: number;
 	dodges: number;
 	elapsedMs: number;
-	flash: 'bad' | 'good' | null;
+	flash: FlashKind;
+	flashTicksLeft: number;
 	hits: number;
 	message: string;
 	nextId: number;
+	nextPopupId: number;
 	playerX: number;
+	popups: Popup[];
 	score: number;
 	tick: number;
 };
@@ -42,10 +51,13 @@ const initialState = (): DodgeState => ({
 	dodges: 0,
 	elapsedMs: 0,
 	flash: null,
+	flashTicksLeft: 0,
 	hits: 0,
 	message: 'Float left and right. Bugs are not invited.',
 	nextId: 1,
+	nextPopupId: 1,
 	playerX: Math.floor(BOARD_WIDTH / 2),
+	popups: [],
 	score: 0,
 	tick: 0,
 });
@@ -97,23 +109,28 @@ export const DodgeGame = ({
 				);
 				const tick = current.tick + 1;
 				const bugs: Bug[] = [];
+				const newPopups: Popup[] = [];
+				let nextPopupId = current.nextPopupId;
 				let score = current.score;
 				let hits = current.hits;
 				let dodges = current.dodges;
 				let combo = current.combo;
 				let bestCombo = current.bestCombo;
 				let message = current.message;
-				let flash: DodgeState['flash'] = null;
+				let newFlash: FlashKind = null;
 
 				for (const bug of current.bugs) {
 					const movedBug = {...bug, y: bug.y + 1};
 
 					if (movedBug.y === PLAYER_ROW && movedBug.x === current.playerX) {
-						score -= 6;
+						const delta = -6;
+						score += delta;
 						hits += 1;
 						combo = 0;
 						message = '-6 bug hug. Combo composted.';
-						flash = 'bad';
+						newFlash = 'bad';
+						newPopups.push(createPopup(nextPopupId, delta, current.playerX));
+						nextPopupId += 1;
 						continue;
 					}
 
@@ -128,7 +145,9 @@ export const DodgeGame = ({
 						message = nearMiss
 							? `+${points} near miss. Cozy but alarming.`
 							: `+${points} clean dodge. Combo x${combo}.`;
-						flash = 'good';
+						newFlash = 'good';
+						newPopups.push(createPopup(nextPopupId, points, movedBug.x));
+						nextPopupId += 1;
 						continue;
 					}
 
@@ -157,6 +176,13 @@ export const DodgeGame = ({
 					nextId += 1;
 				}
 
+				const popups = [...advancePopups(current.popups), ...newPopups];
+				const {flash, flashTicksLeft} = advanceFlash(
+					current.flash,
+					current.flashTicksLeft,
+					newFlash,
+				);
+
 				return {
 					bestCombo,
 					bugs,
@@ -164,10 +190,13 @@ export const DodgeGame = ({
 					dodges,
 					elapsedMs,
 					flash,
+					flashTicksLeft,
 					hits,
 					message,
 					nextId,
+					nextPopupId,
 					playerX: current.playerX,
+					popups,
 					score,
 					tick,
 				};
@@ -208,13 +237,21 @@ export const DodgeGame = ({
 	);
 
 	const itemColor = useCallback((): InkColor => 'green', []);
-	const board = useBoard({itemColor, items: state.bugs, playerX: state.playerX});
+	const board = useBoard({
+		itemColor,
+		items: state.bugs,
+		playerColor: playerColorFor(state.flash),
+		playerLabel: playerSpriteFor(state.flash),
+		playerX: state.playerX,
+		popups: state.popups,
+	});
 
 	return (
 		<GameShell
 			accent={definition.accent}
 			bestScore={bestScore}
 			board={board}
+			combo={state.combo}
 			controls={definition.controls}
 			durationSeconds={definition.durationSeconds}
 			elapsedMs={state.elapsedMs}
@@ -222,8 +259,6 @@ export const DodgeGame = ({
 			message={state.message}
 			score={state.score}
 			status={[
-				{label: 'Time', value: `${timeLeftSeconds(definition.durationSeconds, state.elapsedMs)}s`},
-				{label: 'Combo', value: `x${state.combo}`},
 				{label: 'Dodged', value: state.dodges},
 				{label: 'Hits', value: state.hits},
 			]}

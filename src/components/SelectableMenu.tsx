@@ -20,6 +20,13 @@ type SelectableMenuProps = {
 	title: string;
 };
 
+const BAR_PADDING = 4;
+
+const optionLabelText = (option: MenuOption, index: number): string => {
+	const iconSegment = option.icon ? `${option.icon} ` : '';
+	return `${index + 1}. ${iconSegment}${option.label}`;
+};
+
 export const SelectableMenu = ({
 	accent = 'cyan',
 	footer,
@@ -65,6 +72,12 @@ export const SelectableMenu = ({
 		}
 	});
 
+	const longestLabel = options.reduce(
+		(max, option, index) => Math.max(max, optionLabelText(option, index).length),
+		0,
+	);
+	const barInnerWidth = longestLabel + BAR_PADDING;
+
 	return (
 		<Box flexDirection="column" gap={1}>
 			{header ?? (
@@ -79,14 +92,18 @@ export const SelectableMenu = ({
 			<Box flexDirection="column">
 				{options.map((option, index) => {
 					const isSelected = index === selectedIndex;
+					const labelText = optionLabelText(option, index);
+					const paddedLabel = labelText.padEnd(barInnerWidth, ' ');
 
 					return (
 						<Box key={option.label} flexDirection="column">
-							<Text bold={isSelected} color={isSelected ? accent : undefined}>
-								{isSelected ? '› ' : '  '}
-								{index + 1}. {option.icon ? `${option.icon} ` : ''}
-								{option.label}
-							</Text>
+							{isSelected ? (
+								<Text backgroundColor={accent} bold color="black">
+									{` › ${paddedLabel} `}
+								</Text>
+							) : (
+								<Text>{`   ${paddedLabel} `}</Text>
+							)}
 							{option.description ? (
 								<Text dimColor>     {option.description}</Text>
 							) : null}

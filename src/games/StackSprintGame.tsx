@@ -3,18 +3,23 @@ import {GameShell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult, InkColor} from '../types.js';
 import {
 	BOARD_WIDTH,
+	Banner,
 	FallingItem,
 	FlashKind,
 	PLAYER_ROW,
 	Popup,
+	advanceBanner,
 	advanceFlash,
 	advancePopups,
+	comboBannerFor,
 	comboBonus,
 	createPopup,
 	moveLeft,
 	moveRight,
 	playerColorFor,
 	playerSpriteFor,
+	pushMessage,
+	shouldShake,
 	spawnEveryTicks,
 	useBoard,
 	useFinishOnce,
@@ -27,6 +32,7 @@ const SPAWN_EVERY_TICKS = 2;
 type StackItem = FallingItem<'err' | 'fix'>;
 
 type StackState = {
+	banner: Banner | null;
 	bestCombo: number;
 	combo: number;
 	elapsedMs: number;
@@ -40,11 +46,13 @@ type StackState = {
 	nextPopupId: number;
 	playerX: number;
 	popups: Popup[];
+	prevMessage: string;
 	score: number;
 	tick: number;
 };
 
 const initialState = (): StackState => ({
+	banner: null,
 	bestCombo: 0,
 	combo: 0,
 	elapsedMs: 0,
@@ -58,6 +66,7 @@ const initialState = (): StackState => ({
 	nextPopupId: 1,
 	playerX: Math.floor(BOARD_WIDTH / 2),
 	popups: [],
+	prevMessage: '',
 	score: 0,
 	tick: 0,
 });
@@ -202,8 +211,15 @@ export const StackSprintGame = ({
 					current.flashTicksLeft,
 					newFlash,
 				);
+				const banner =
+					comboBannerFor(current.combo, combo) ?? advanceBanner(current.banner);
+				const log = pushMessage(
+					{message: current.message, prevMessage: current.prevMessage},
+					message,
+				);
 
 				return {
+					banner,
 					bestCombo,
 					combo,
 					elapsedMs,
@@ -212,11 +228,12 @@ export const StackSprintGame = ({
 					flash,
 					flashTicksLeft,
 					items,
-					message,
+					message: log.message,
 					nextId,
 					nextPopupId,
 					playerX: current.playerX,
 					popups,
+					prevMessage: log.prevMessage,
 					score,
 					tick,
 				};
@@ -272,6 +289,7 @@ export const StackSprintGame = ({
 	return (
 		<GameShell
 			accent={definition.accent}
+			banner={state.banner}
 			bestScore={bestScore}
 			board={board}
 			combo={state.combo}
@@ -280,7 +298,9 @@ export const StackSprintGame = ({
 			elapsedMs={state.elapsedMs}
 			flash={state.flash}
 			message={state.message}
+			prevMessage={state.prevMessage}
 			score={state.score}
+			shake={shouldShake(state.flash, state.flashTicksLeft)}
 			status={[
 				{label: 'Fixes', value: state.fixes},
 				{label: 'ERR hits', value: state.errors},

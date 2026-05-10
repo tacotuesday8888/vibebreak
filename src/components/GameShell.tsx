@@ -6,8 +6,14 @@ export type BoardCell = {
 	label: string;
 };
 
+type ShellBanner = {
+	color: InkColor;
+	text: string;
+};
+
 type GameShellProps = {
 	accent: InkColor;
+	banner?: ShellBanner | null;
 	bestScore?: number;
 	board: BoardCell[][];
 	combo: number;
@@ -16,7 +22,9 @@ type GameShellProps = {
 	elapsedMs: number;
 	flash?: 'bad' | 'good' | null;
 	message: string;
+	prevMessage?: string;
 	score: number;
+	shake?: boolean;
 	status: Array<{
 		label: string;
 		value: string | number;
@@ -149,8 +157,30 @@ const TimeBar = ({
 	);
 };
 
+const renderBannerTopBorder = (
+	dividerWidth: number,
+	banner: ShellBanner | null | undefined,
+): {color: InkColor; text: string} | null => {
+	if (!banner) {
+		return null;
+	}
+
+	const label = ` ✦ ${banner.text} ✦ `;
+
+	if (label.length >= dividerWidth - 2) {
+		return null;
+	}
+
+	const leftPad = Math.floor((dividerWidth - label.length) / 2);
+	const rightPad = dividerWidth - label.length - leftPad;
+	const text = `╭${'─'.repeat(leftPad)}${label}${'─'.repeat(rightPad)}╮`;
+
+	return {color: banner.color, text};
+};
+
 export const GameShell = ({
 	accent,
+	banner = null,
 	bestScore,
 	board,
 	combo,
@@ -159,7 +189,9 @@ export const GameShell = ({
 	elapsedMs,
 	flash = null,
 	message,
+	prevMessage,
 	score,
+	shake = false,
 	status,
 	title,
 }: GameShellProps) => {
@@ -167,6 +199,8 @@ export const GameShell = ({
 	const divider = '─'.repeat(rowWidth + 2);
 	const currentBorderColor = borderColor(flash, accent);
 	const statusText = status.map(item => `${item.label} ${item.value}`).join('  ');
+	const bannerBorder = renderBannerTopBorder(divider.length, banner);
+	const shakeIndent = shake ? ' ' : '';
 
 	return (
 		<Box flexDirection="column" gap={1}>
@@ -195,10 +229,19 @@ export const GameShell = ({
 			</Box>
 
 			<Box flexDirection="column">
-				<Text color={currentBorderColor}>╭{divider}╮</Text>
+				{bannerBorder ? (
+					<Text bold color={bannerBorder.color}>
+						{shakeIndent}
+						{bannerBorder.text}
+					</Text>
+				) : (
+					<Text color={currentBorderColor}>
+						{shakeIndent}╭{divider}╮
+					</Text>
+				)}
 				{board.map((row, rowIndex) => (
 					<Text key={rowIndex} color={currentBorderColor}>
-						{'│ '}
+						{`${shakeIndent}│ `}
 						{row.map((cell, cellIndex) => {
 							if (cell.label === ' ') {
 								return (
@@ -217,7 +260,9 @@ export const GameShell = ({
 						{' │'}
 					</Text>
 				))}
-				<Text color={currentBorderColor}>╰{divider}╯</Text>
+				<Text color={currentBorderColor}>
+					{shakeIndent}╰{divider}╯
+				</Text>
 			</Box>
 
 			<Box flexDirection="column">
@@ -228,6 +273,7 @@ export const GameShell = ({
 					{flash === 'bad' ? '!! ' : flash === 'good' ? '++ ' : '·  '}
 					{message}
 				</Text>
+				{prevMessage ? <Text dimColor>·  {prevMessage}</Text> : null}
 				<Text dimColor>{controls}</Text>
 			</Box>
 		</Box>

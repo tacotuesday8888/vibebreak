@@ -53,7 +53,7 @@ const COFFEE_STARTS: Point[] = [
 	{x: 1, y: 9},
 	{x: 16, y: 5},
 ];
-const POWER_TICKS = 36;
+const POWER_TICKS = 44;
 
 type MazeState = {
 	banner: Banner | null;
@@ -278,7 +278,7 @@ export const MazeMunchGame = ({
 					nextPopupId += 1;
 				}
 
-				if (tick % 3 === 0) {
+				if (tick % 4 === 0) {
 					bugs = bugs.map(bug => moveBug(bug, player, powerTicks > 0));
 				}
 

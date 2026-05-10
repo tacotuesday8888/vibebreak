@@ -25,7 +25,7 @@ import {
 const TICK_MS = 115;
 const BIRD_X = 3;
 const GAP_SIZE = 4;
-const SPAWN_EVERY_TICKS = 14;
+const SPAWN_EVERY_TICKS = 16;
 const START_Y = Math.floor(BOARD_HEIGHT / 2);
 
 type Gate = {

@@ -201,6 +201,8 @@ npm test
 - Optional Codex/Claude session wrapper
 - No backend or external services
 
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
 ## Roadmap
 
 - Add more tiny games

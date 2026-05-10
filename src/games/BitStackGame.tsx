@@ -23,7 +23,7 @@ import {
 
 const STACK_WIDTH = 10;
 const STACK_HEIGHT = 14;
-const TICK_MS = 260;
+const TICK_MS = 300;
 
 type StackCell = {
 	color: InkColor;

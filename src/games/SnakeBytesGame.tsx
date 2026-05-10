@@ -30,7 +30,7 @@ import {
 	useFinishOnce,
 } from './gameHelpers.js';
 
-const TICK_MS = 135;
+const TICK_MS = 150;
 const START_X = Math.floor(BOARD_WIDTH / 2);
 const START_Y = Math.floor(BOARD_HEIGHT / 2);
 

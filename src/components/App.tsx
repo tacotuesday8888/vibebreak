@@ -114,7 +114,7 @@ const ChooseGameScreen = ({
 	onPlay: (gameId: GameId) => void;
 }) => (
 	<SelectableMenu
-		accent="cyan"
+		accent={colors.brandAlt}
 		onCancel={onBack}
 		options={games.map(game => ({
 			description: [
@@ -286,7 +286,7 @@ const FinalScreen = ({
 	});
 
 	const game = getGameById(result.gameId);
-	const accent: InkColor = game?.accent ?? 'magenta';
+	const accent: InkColor = game?.accent ?? colors.brand;
 	const stars = computeStars(result.score, priorBest);
 	const starsText = renderStars(stars);
 	const isNewBest =
@@ -320,7 +320,7 @@ const FinalScreen = ({
 				<Text color={accent}>╭{divider}╮</Text>
 				<Text color={accent}>
 					{'│ '}
-					<Text bold color="white">
+					<Text bold color={colors.text}>
 						{result.gameName}
 					</Text>
 					{gameNamePad}
@@ -329,13 +329,13 @@ const FinalScreen = ({
 				<Text color={accent}>
 					{'│ '}
 					<Text dimColor>Score </Text>
-					<Text bold color="white">
+					<Text bold color={colors.text}>
 						{scoreStr}
 					</Text>
 					{bestStr === null ? null : (
 						<>
 							<Text dimColor>{'  Best '}</Text>
-							<Text color="white">{bestStr}</Text>
+							<Text color={colors.text}>{bestStr}</Text>
 						</>
 					)}
 					{scoreLinePad}
@@ -357,7 +357,7 @@ const FinalScreen = ({
 						<Text key={stat.label} color={accent}>
 							{'│ '}
 							<Text dimColor>{stat.label} </Text>
-							<Text color="white">{valueStr}</Text>
+							<Text color={colors.text}>{valueStr}</Text>
 							{pad}
 							{' │'}
 						</Text>

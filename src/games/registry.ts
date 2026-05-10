@@ -6,10 +6,11 @@ import {FlapFixGame} from './FlapFixGame.js';
 import {MazeMunchGame} from './MazeMunchGame.js';
 import {SnakeBytesGame} from './SnakeBytesGame.js';
 import {StackSprintGame} from './StackSprintGame.js';
+import {colors} from '../utils/theme.js';
 
 export const games: GameDefinition[] = [
 	{
-		accent: 'green',
+		accent: colors.saved,
 		component: DodgeGame,
 		controls: 'A/D or arrows move · near misses score more · Q back',
 		description: 'Slide away from bugs, chain dodges, and flirt with danger.',
@@ -20,7 +21,7 @@ export const games: GameDefinition[] = [
 		objective: 'Stay loose, dodge falling bugs, and collect near-miss style points.',
 	},
 	{
-		accent: 'cyan',
+		accent: colors.brandAlt,
 		component: CommitCatchGame,
 		controls: 'A/D or arrows move · catch ✓ + ☕ · avoid 🐛 ! · Q back',
 		description: 'Catch good commits, keep a streak, avoid spicy diffs.',
@@ -31,7 +32,7 @@ export const games: GameDefinition[] = [
 		objective: 'Catch useful tokens and leave the suspicious ones alone.',
 	},
 	{
-		accent: 'magenta',
+		accent: colors.brand,
 		component: StackSprintGame,
 		controls: 'A/D or arrows move · grab FIX · dodge ERR · chain combos · Q back',
 		description: 'Grab tiny fixes and sidestep errors as the trace speeds up.',
@@ -42,7 +43,7 @@ export const games: GameDefinition[] = [
 		objective: 'Grab FIX tokens and sidestep noisy ERR blocks.',
 	},
 	{
-		accent: 'green',
+		accent: colors.saved,
 		component: SnakeBytesGame,
 		controls: 'WASD or arrows steer · eat + ☕ · avoid walls/self · Q back',
 		description: 'A tiny command trail that grows when it snacks.',
@@ -53,7 +54,7 @@ export const games: GameDefinition[] = [
 		objective: 'Steer the byte trail, snack cleanly, and avoid tangling yourself.',
 	},
 	{
-		accent: 'cyan',
+		accent: colors.brandAlt,
 		component: FlapFixGame,
 		controls: 'Space/W/↑ flap · pass gaps · catch FIX · Q back',
 		description: 'Tap through deploy pipes without clipping the build.',
@@ -64,7 +65,7 @@ export const games: GameDefinition[] = [
 		objective: 'Keep the fix airborne through gaps and grab mid-flight patches.',
 	},
 	{
-		accent: 'yellow',
+		accent: colors.accent,
 		component: MazeMunchGame,
 		controls: 'WASD or arrows move · eat dots/☕ · dodge bugs · Q back',
 		description: 'Munch through a tiny maze and caffeinate into bug-chomp mode.',
@@ -75,7 +76,7 @@ export const games: GameDefinition[] = [
 		objective: 'Clear dots, sip coffee, and turn bugs into bonus points.',
 	},
 	{
-		accent: 'blue',
+		accent: colors.purple,
 		component: BitStackGame,
 		controls: 'A/D move · W/↑ rotate · S/↓ drop · clear rows · Q back',
 		description: 'A compact falling-block stacker for terminal breaks.',

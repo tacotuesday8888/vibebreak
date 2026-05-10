@@ -2,6 +2,7 @@ import {useEffect, useMemo, useRef} from 'react';
 import {useInput} from 'ink';
 import type {BoardCell} from '../components/GameShell.js';
 import type {GameResult, InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 
 export const BOARD_WIDTH = 18;
 export const BOARD_HEIGHT = 12;
@@ -154,7 +155,7 @@ export const advancePopups = (popups: Popup[]): Popup[] =>
 		.filter(popup => popup.ticksLeft > 0 && popup.y >= 0);
 
 export const popupColor = (kind: PopupKind): InkColor =>
-	kind === 'good' ? 'yellow' : 'red';
+	kind === 'good' ? colors.accent : colors.failed;
 
 export const advanceFlash = (
 	currentFlash: FlashKind,
@@ -179,14 +180,14 @@ export const playerSpriteFor = (flash: FlashKind): string =>
 
 export const playerColorFor = (flash: FlashKind): InkColor => {
 	if (flash === 'bad') {
-		return 'red';
+		return colors.failed;
 	}
 
 	if (flash === 'good') {
-		return 'yellow';
+		return colors.accent;
 	}
 
-	return 'white';
+	return colors.text;
 };
 
 export const useDirectionalControls = (
@@ -246,9 +247,9 @@ const COMBO_BANNERS: Array<{
 	text: string;
 	threshold: number;
 }> = [
-	{color: 'cyan', text: 'TIDY!', threshold: 3},
-	{color: 'magenta', text: 'CRISP!', threshold: 6},
-	{color: 'yellow', text: 'VIBE WAVE!', threshold: 10},
+	{color: colors.brandAlt, text: 'TIDY!', threshold: 3},
+	{color: colors.brand, text: 'CRISP!', threshold: 6},
+	{color: colors.accent, text: 'VIBE WAVE!', threshold: 10},
 ];
 
 export const comboBannerFor = (
@@ -346,7 +347,7 @@ export const useFinishOnce = (
 export const useBoard = <TItem extends FallingItem<string>>({
 	itemColor,
 	items,
-	playerColor = 'white',
+	playerColor = colors.text,
 	playerLabel = PLAYER_SPRITE,
 	playerX,
 	popups = [],

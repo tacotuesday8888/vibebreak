@@ -4,6 +4,11 @@ All notable changes to Vibebreak are documented here.
 
 ## Unreleased
 
+## 0.3.4 - 2026-05-10
+
+- Switched the CLI and GitHub preview assets to one brighter neon palette.
+- Updated in-game item, player, popup, timer, and combo colors to match the VIBEBREAK banner style.
+
 ## 0.3.3 - 2026-05-10
 
 - Brightened the live terminal brand colors to better match the GitHub banner.

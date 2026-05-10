@@ -1,9 +1,12 @@
 import type {InkColor} from '../types.js';
 
 export const colors = {
-	brand: '#d86cff' as InkColor,
-	brandAlt: '#6ee7f9' as InkColor,
-	accent: '#facc15' as InkColor,
-	saved: '#22c55e' as InkColor,
-	failed: '#ff5f57' as InkColor,
+	brand: '#F15BFF' as InkColor,
+	brandAlt: '#5DF4FF' as InkColor,
+	accent: '#FFE45E' as InkColor,
+	saved: '#39FF88' as InkColor,
+	failed: '#FF4D6D' as InkColor,
+	blue: '#5E7CFF' as InkColor,
+	purple: '#9B5CFF' as InkColor,
+	text: '#F8FAFC' as InkColor,
 } as const;

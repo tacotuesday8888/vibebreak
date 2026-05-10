@@ -3,25 +3,25 @@
   <desc id="desc">A terminal gameplay preview for Vibebreak showing a framed board, score chips, combo meter, and controls.</desc>
   <rect width="900" height="560" rx="22" fill="#0a0a12"/>
   <rect x="24" y="24" width="852" height="512" rx="16" fill="#101018" stroke="#334155" stroke-width="2"/>
-  <circle cx="54" cy="54" r="6" fill="#ff5f57"/>
-  <circle cx="76" cy="54" r="6" fill="#ffbd2e"/>
-  <circle cx="98" cy="54" r="6" fill="#28c840"/>
-  <text x="54" y="98" fill="#67e8f9" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="22" font-weight="700">✦ VIBEBREAK // Commit Catch</text>
+  <circle cx="54" cy="54" r="6" fill="#FF4D6D"/>
+  <circle cx="76" cy="54" r="6" fill="#FFE45E"/>
+  <circle cx="98" cy="54" r="6" fill="#39FF88"/>
+  <text x="54" y="98" fill="#5DF4FF" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="22" font-weight="700">✦ VIBEBREAK // Commit Catch</text>
   <text x="54" y="130" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">Catch useful tokens and leave the suspicious ones alone.</text>
-  <text x="54" y="166" fill="#67e8f9" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">[</text>
+  <text x="54" y="166" fill="#5DF4FF" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">[</text>
   <text x="68" y="166" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">Score </text>
-  <text x="126" y="166" fill="#f5f5f5" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16" font-weight="700">42</text>
-  <text x="150" y="166" fill="#67e8f9" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">]  [Best 88]  [Good 13]  [Spicy 2]</text>
-  <text x="54" y="198" fill="#f5f5f5" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">Combo x6 </text>
-  <text x="150" y="198" fill="#d86cff" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">[██████████░░░░░░]</text>
-  <text x="54" y="228" fill="#22c55e" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">Time 31s [███████░░░░░░░░░░░░░░░░] vibe: spark</text>
-  <text x="54" y="266" fill="#67e8f9" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">╭────────────────────────────────────────────────────────╮</text>
+  <text x="126" y="166" fill="#F8FAFC" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16" font-weight="700">42</text>
+  <text x="150" y="166" fill="#5DF4FF" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">]  [Best 88]  [Good 13]  [Spicy 2]</text>
+  <text x="54" y="198" fill="#F8FAFC" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">Combo x6 </text>
+  <text x="150" y="198" fill="#F15BFF" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">[██████████░░░░░░]</text>
+  <text x="54" y="228" fill="#39FF88" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">Time 31s [███████░░░░░░░░░░░░░░░░] vibe: spark</text>
+  <text x="54" y="266" fill="#5DF4FF" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">╭────────────────────────────────────────────────────────╮</text>
   <text x="54" y="292" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">│  ·  ·  ·  ·  ✓  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  +  ·  ·  │</text>
   <text x="54" y="318" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">│  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  🐛 ·  ·  ·  ·  ·  ·  ·  │</text>
   <text x="54" y="344" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">│  ·  ·  ☕ ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  !  ·  ·  ·  ·  │</text>
   <text x="54" y="370" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">│  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  │</text>
-  <text x="54" y="396" fill="#facc15" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">│  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  &lt;o&gt; ·  ·  ·  ·  +8 ·  ·  │</text>
-  <text x="54" y="422" fill="#67e8f9" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">╰────────────────────────────────────────────────────────╯</text>
-  <text x="54" y="466" fill="#facc15" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="17">++ +8 clean commit chain. Combo x6.</text>
+  <text x="54" y="396" fill="#FFE45E" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">│  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  &lt;o&gt; ·  ·  ·  ·  +8 ·  ·  │</text>
+  <text x="54" y="422" fill="#5DF4FF" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">╰────────────────────────────────────────────────────────╯</text>
+  <text x="54" y="466" fill="#FFE45E" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="17">++ +8 clean commit chain. Combo x6.</text>
   <text x="54" y="498" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="15">A/D or arrows move · catch ✓ + ☕ · avoid 🐛 ! · Q back</text>
 </svg>

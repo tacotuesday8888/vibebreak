@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {GameShell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult, InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {
 	BOARD_WIDTH,
 	Banner,
@@ -290,7 +291,8 @@ export const CommitCatchGame = ({
 	);
 
 	const itemColor = useCallback(
-		(item: CommitItem): InkColor => (item.kind === 'good' ? 'cyan' : 'red'),
+		(item: CommitItem): InkColor =>
+			item.kind === 'good' ? colors.brandAlt : colors.failed,
 		[],
 	);
 	const board = useBoard({

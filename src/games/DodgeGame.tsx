@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {GameShell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult, InkColor} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {
 	BOARD_WIDTH,
 	Banner,
@@ -253,7 +254,7 @@ export const DodgeGame = ({
 		onFinish,
 	);
 
-	const itemColor = useCallback((): InkColor => 'green', []);
+	const itemColor = useCallback((): InkColor => colors.saved, []);
 	const board = useBoard({
 		itemColor,
 		items: state.bugs,

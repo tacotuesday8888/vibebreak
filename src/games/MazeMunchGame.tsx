@@ -2,6 +2,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {GameShell} from '../components/GameShell.js';
 import type {BoardCell} from '../components/GameShell.js';
 import type {GameComponentProps, GameResult} from '../types.js';
+import {colors} from '../utils/theme.js';
 import {
 	Banner,
 	Direction,
@@ -188,23 +189,28 @@ const buildBoard = ({
 			const key = pointKey(point);
 
 			if (MAZE[y]![x] === '#') {
-				paintCell(board, point, '#', 'blue');
+				paintCell(board, point, '#', colors.blue);
 			} else if (coffees.has(key)) {
-				paintCell(board, point, '☕', 'yellow');
+				paintCell(board, point, '☕', colors.accent);
 			} else if (pellets.has(key)) {
-				paintCell(board, point, '.', 'white');
+				paintCell(board, point, '.', colors.text);
 			}
 		}
 	}
 
 	for (const bug of bugs) {
-		paintCell(board, bug, 'B', powerTicks > 0 ? 'cyan' : 'red');
+		paintCell(board, bug, 'B', powerTicks > 0 ? colors.brandAlt : colors.failed);
 	}
 
-	paintCell(board, player, '@', 'yellow');
+	paintCell(board, player, '@', colors.accent);
 
 	for (const popup of popups) {
-		paintCell(board, popup, popup.text, popup.kind === 'good' ? 'yellow' : 'red');
+		paintCell(
+			board,
+			popup,
+			popup.text,
+			popup.kind === 'good' ? colors.accent : colors.failed,
+		);
 	}
 
 	return board;

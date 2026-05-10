@@ -29,7 +29,7 @@ const WORDMARK_STYLES: RowStyle[] = [
 	{bold: true, color: colors.brandAlt},
 	{bold: true, color: colors.brand},
 	{color: colors.brand},
-	{color: colors.brand, dim: true},
+	{color: colors.purple},
 ];
 
 type PetFrame = {

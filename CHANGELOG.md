@@ -4,6 +4,11 @@ All notable changes to Vibebreak are documented here.
 
 ## Unreleased
 
+## 0.3.5 - 2026-05-10
+
+- Retuned the live CLI colors so terminal rendering looks closer to the brighter GitHub banner.
+- Removed the dimmed logo shadow row in favor of a stronger neon purple row.
+
 ## 0.3.4 - 2026-05-10
 
 - Switched the CLI and GitHub preview assets to one brighter neon palette.

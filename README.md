@@ -27,13 +27,13 @@ The npm package is [`vibebreak-arcade`](https://www.npmjs.com/package/vibebreak-
 Run without installing:
 
 ```bash
-npx vibebreak-arcade
+npx --yes vibebreak-arcade@latest
 ```
 
 Jump straight into Today's Break:
 
 ```bash
-npx vibebreak-arcade daily
+npx --yes vibebreak-arcade@latest daily
 ```
 
 Vibebreak requires Node.js 22 or newer because it uses Ink 7.
@@ -83,6 +83,8 @@ vibebreak-arcade play bit-stack
 
 ## Commands
 
+The commands below assume you installed Vibebreak globally with `npm install --global vibebreak-arcade`. If you have not installed it, replace `vibebreak-arcade` with `npx --yes vibebreak-arcade@latest`.
+
 ```bash
 vibebreak-arcade
 vibebreak-arcade daily
@@ -117,6 +119,14 @@ vibebreak-arcade agent claude --break=both --threshold=15 -- "fix the tests"
 Vibebreak includes a small opt-in wrapper for Codex and Claude. It can offer Today's Break before a coding-agent session starts, after a long session ends, or both.
 
 Nothing is installed automatically. Your normal `codex` and `claude` commands stay untouched unless you choose to add an alias yourself.
+
+Try it without installing Vibebreak globally:
+
+```bash
+npx --yes vibebreak-arcade@latest agent codex --break=start -- "build the feature"
+```
+
+Or, after global install:
 
 ```bash
 vibebreak-arcade agent codex --break=start -- "build the feature"

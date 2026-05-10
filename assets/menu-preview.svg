@@ -21,7 +21,7 @@
   <text x="180" y="360" fill="#f5f5f5" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="20" font-weight="700">Bit Stack</text>
   <text x="60" y="392" fill="#facc15" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="21" xml:space="preserve"> &gt; ^ &lt;   </text>
   <text x="180" y="392" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="16">45 seconds · local high scores</text>
-  <text x="58" y="444" fill="#67e8f9" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="18">› 1. [] Play Today's Break</text>
-  <text x="84" y="472" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="15">Today: [] Bit Stack · Stack tiny blocks, clear rows, and avoid overflow.</text>
+  <text x="58" y="444" fill="#67e8f9" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="18">› 1. ✦ Play Today's Break</text>
+  <text x="84" y="472" fill="#94a3b8" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="15">Today: Bit Stack · Stack tiny blocks, clear rows, and avoid overflow.</text>
   <text x="58" y="504" fill="#f5f5f5" font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace" font-size="18">  2. ▣ Choose Game    3. ★ High Scores    4. × Quit</text>
 </svg>

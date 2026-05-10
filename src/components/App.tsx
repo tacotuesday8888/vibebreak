@@ -69,8 +69,8 @@ const MainMenu = ({
 		onCancel={onQuit}
 		options={[
 			{
-				description: `Today: ${dailyGame.name}`,
-				icon: '✦',
+				description: `Today: ${dailyGame.icon} ${dailyGame.name} · ${dailyGame.objective}`,
+				icon: dailyGame.icon,
 				label: "Play Today's Break",
 				onSelect: onStartDaily,
 			},
@@ -104,8 +104,8 @@ const ChooseGameScreen = ({
 		accent="cyan"
 		onCancel={onBack}
 		options={games.map(game => ({
-			description: game.description,
-			icon: game.id === 'dodge' ? '🐛' : game.id === 'commit-catch' ? '✓' : '!',
+			description: `${game.description} · ${game.controls}`,
+			icon: game.icon,
 			label: game.name,
 			onSelect: () => {
 				onPlay(game.id);

@@ -314,6 +314,7 @@ export const CommitCatchGame = ({
 			elapsedMs={state.elapsedMs}
 			flash={state.flash}
 			message={state.message}
+			objective={definition.objective}
 			prevMessage={state.prevMessage}
 			score={state.score}
 			shake={shouldShake(state.flash, state.flashTicksLeft)}

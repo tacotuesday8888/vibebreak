@@ -3,18 +3,19 @@ name: Release
 # Publishes vibebreak-arcade to npm whenever a SemVer tag (vX.Y.Z) is pushed.
 #
 # One-time setup before publishing:
-#   1. Create a granular npm access token at https://www.npmjs.com/settings/<your-user>/tokens
-#      with package read/write access and 2FA bypass for CI publishing.
-#   2. Add it as a repository secret named `NPM_TOKEN`
-#      (Settings -> Secrets and variables -> Actions -> New repository secret).
-#   3. Make sure `package.json` `version` matches the tag you push.
+#   1. Configure npm trusted publishing for this package:
+#      Provider: GitHub Actions
+#      Organization/user: tacotuesday8888
+#      Repository: vibebreak
+#      Workflow filename: release.yml
+#   2. Make sure `package.json` `version` matches the tag you push.
 #      `npm version patch|minor|major` updates package.json AND creates the tag.
 #
 # Cutting a release:
 #   npm version patch
 #   git push --follow-tags
 #
-# The workflow then runs tests, builds, and publishes with provenance.
+# The workflow then runs tests and publishes through npm trusted publishing.
 
 on:
   push:
@@ -30,14 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
+          package-manager-cache: false
 
       - name: Install dependencies
         run: npm ci
@@ -55,6 +56,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

@@ -4,6 +4,8 @@ All notable changes to Vibebreak are documented here.
 
 ## Unreleased
 
+- Added `wait -- <command>` mode, which runs non-interactive developer commands with a tiny arcade runner and recent command output.
+
 ## 0.3.5 - 2026-05-10
 
 - Retuned the live CLI colors so terminal rendering looks closer to the brighter GitHub banner.

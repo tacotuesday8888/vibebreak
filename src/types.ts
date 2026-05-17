@@ -70,3 +70,9 @@ export type AppCommand =
 	| {kind: 'daily'}
 	| {gameId: GameId; kind: 'play'}
 	| {kind: 'scores'};
+
+export type WaitCommand = {
+	args: string[];
+	command: string;
+	kind: 'wait';
+};

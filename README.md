@@ -36,6 +36,12 @@ Jump straight into Today's Break:
 npx --yes vibebreak-arcade@latest daily
 ```
 
+Make a command wait more fun:
+
+```bash
+npx --yes vibebreak-arcade@latest wait -- npm test
+```
+
 Vibebreak requires Node.js 22 or newer because it uses Ink 7.
 
 ## Install
@@ -52,6 +58,7 @@ Then run:
 vibebreak-arcade
 vibebreak-arcade daily
 vibebreak-arcade play snake-bytes
+vibebreak-arcade wait -- npm test
 vibebreak-arcade scores
 ```
 
@@ -89,6 +96,7 @@ The commands below assume you installed Vibebreak globally with `npm install --g
 vibebreak-arcade
 vibebreak-arcade daily
 vibebreak-arcade play <game-id>
+vibebreak-arcade wait -- <command>
 vibebreak-arcade scores
 ```
 
@@ -97,9 +105,13 @@ Examples:
 ```bash
 vibebreak-arcade play commit-catch
 vibebreak-arcade play maze-munch
+vibebreak-arcade wait -- npm test
+vibebreak-arcade wait -- npm run build
 ```
 
 `daily` chooses the same game for the same local calendar date, so Today's Break rotates without needing the internet.
+
+`wait --` runs a non-interactive command while Vibebreak shows a tiny arcade runner and recent output lines. It exits with the command's real status code, so a failing test command still fails. Use it for tests, builds, installs, lint, and typecheck commands; interactive commands such as shells, editors, and prompts are out of scope for this first version.
 
 ## Controls
 
@@ -152,6 +164,8 @@ Node remains the default runtime.
 
 Vibebreak uses [Ink](https://github.com/vadimdemedes/ink) and needs an interactive TTY. It works in standard terminals such as macOS Terminal, iTerm2, Windows Terminal, GNOME Terminal, kitty, and alacritty. Some sandboxes and CI runners do not provide a real TTY and will not start the interactive menu.
 
+In non-interactive environments, `wait --` skips the arcade UI and runs the command normally while preserving the command's exit status.
+
 Emoji rendering depends on your terminal font. If `🐛` or `☕` look misaligned, try a font with full emoji support such as JetBrains Mono, Fira Code, or your platform's default monospace.
 
 ## Project Status
@@ -167,7 +181,7 @@ Emoji rendering depends on your terminal font. If `🐛` or `☕` look misaligne
 - More gameplay balancing
 - A short in-app help screen
 - Local score import/export
-- Optional workflow integrations, if a simple version actually makes sense later
+- More workflow integrations if wait mode keeps feeling useful
 - Optional plain-text mode for terminals with limited emoji support
 
 ## Contributing

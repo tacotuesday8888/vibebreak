@@ -111,11 +111,12 @@ vibebreak-arcade wait -- npm run build
 
 `daily` chooses the same game for the same local calendar date, so Today's Break rotates without needing the internet.
 
-`wait --` runs a non-interactive command while Vibebreak shows a tiny arcade runner and recent output lines. It exits with the command's real status code, so a failing test command still fails. Use it for tests, builds, installs, lint, and typecheck commands; interactive commands such as shells, editors, and prompts are out of scope for this first version.
+`wait --` runs a non-interactive command while Vibebreak shows a playable three-lane runner beside recent output lines. Dodge `#`, collect `$`, grab shield `+` pickups, and keep moving while tests, builds, installs, lint, or typecheck commands run. Vibebreak exits with the command's real status code, so a failing test command still fails. Interactive commands such as shells, editors, and prompts are out of scope for this first version.
 
 ## Controls
 
 - Move: `W`/`A`/`S`/`D` or arrow keys, depending on the game
+- Wait mode: `W`/`S`, `A`/`D`, or arrows switch rails; `Ctrl-C` cancels the wrapped command
 - Flap: `Space`, `W`, or up arrow in Flap Fix
 - Rotate/drop: `W`/up and `S`/down in Bit Stack
 - Menus: arrow keys or `W`/`S`, then `Enter`

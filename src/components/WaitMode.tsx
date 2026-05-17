@@ -20,80 +20,164 @@ type WaitModeProps = {
 
 type RunnerItem = {
 	id: number;
-	kind: 'block' | 'coin';
+	kind: 'boost' | 'coin' | 'obstacle';
 	lane: number;
 	x: number;
 };
+
+type EventKind = 'bad' | 'good' | 'neutral';
 
 type ArcadeState = {
 	bestCombo: number;
 	bonks: number;
 	combo: number;
 	dodges: number;
+	event: string;
+	eventKind: EventKind;
 	flash: 'bad' | 'good' | null;
 	flashTicks: number;
 	items: RunnerItem[];
+	nearMisses: number;
 	nextId: number;
 	playerLane: number;
 	score: number;
+	shield: number;
 	tick: number;
 };
 
 type RunState =
-	| {elapsedMs: number; result: null; status: 'running'}
-	| {elapsedMs: number; result: CommandRunResult; status: 'finished'};
+	| {elapsedMs: number; finishedAt: null; result: null; status: 'running'}
+	| {
+			elapsedMs: number;
+			finishedAt: number;
+			result: CommandRunResult;
+			status: 'finished';
+	  };
+
+type RenderCell = {
+	color: InkColor;
+	dim: boolean;
+	label: string;
+};
 
 const LANES = 3;
-const TRACK_WIDTH = 24;
-const PLAYER_X = 3;
-const TICK_MS = 140;
-const SPAWN_EVERY_TICKS = 5;
-const RECENT_OUTPUT_LINES = 9;
-const EXIT_AFTER_FINISH_MS = 2200;
-const OUTPUT_WIDTH = 72;
+const TRACK_WIDTH = 42;
+const PLAYER_X = 6;
+const TICK_MS = 115;
+const RECENT_OUTPUT_LINES = 10;
+const COMPACT_OUTPUT_LINES = 6;
+const OUTPUT_WIDTH = 62;
+const COMPACT_OUTPUT_WIDTH = 74;
+const NARROW_TERMINAL_COLUMNS = 110;
+const MIN_VISIBLE_MS = 5200;
+const EXIT_AFTER_FINISH_MS = 4200;
 
 const initialArcadeState = (): ArcadeState => ({
 	bestCombo: 0,
 	bonks: 0,
 	combo: 0,
 	dodges: 0,
+	event: 'Run the rails while your command works.',
+	eventKind: 'neutral',
 	flash: null,
 	flashTicks: 0,
 	items: [],
+	nearMisses: 0,
 	nextId: 1,
 	playerLane: 1,
 	score: 0,
+	shield: 1,
 	tick: 0,
 });
 
-const trimOutputLines = (lines: CommandOutputLine[]): CommandOutputLine[] =>
-	lines.length <= RECENT_OUTPUT_LINES
-		? lines
-		: lines.slice(lines.length - RECENT_OUTPUT_LINES);
+const trimOutputLines = (
+	lines: CommandOutputLine[],
+	limit = RECENT_OUTPUT_LINES,
+): CommandOutputLine[] =>
+	lines.length <= limit ? lines : lines.slice(lines.length - limit);
 
-const itemColor = (kind: RunnerItem['kind']): InkColor =>
-	kind === 'coin' ? colors.accent : colors.failed;
+const clampLane = (lane: number): number =>
+	Math.max(0, Math.min(LANES - 1, lane));
 
-const playerColor = (flash: ArcadeState['flash']): InkColor => {
-	if (flash === 'bad') {
+const chooseOtherLane = (lane: number): number => {
+	const offset = Math.floor(Math.random() * (LANES - 1)) + 1;
+	return (lane + offset) % LANES;
+};
+
+const comboBonus = (combo: number): number => Math.min(12, Math.floor(combo / 2));
+
+const spawnIntervalFor = (tick: number): number => {
+	if (tick > 150) {
+		return 3;
+	}
+
+	if (tick > 70) {
+		return 4;
+	}
+
+	return 5;
+};
+
+const itemColor = (kind: RunnerItem['kind']): InkColor => {
+	if (kind === 'coin') {
+		return colors.accent;
+	}
+
+	if (kind === 'boost') {
+		return colors.saved;
+	}
+
+	return colors.failed;
+};
+
+const itemLabel = (kind: RunnerItem['kind']): string => {
+	if (kind === 'coin') {
+		return '$';
+	}
+
+	if (kind === 'boost') {
+		return '+';
+	}
+
+	return '#';
+};
+
+const playerColor = (state: ArcadeState): InkColor => {
+	if (state.flash === 'bad') {
 		return colors.failed;
 	}
 
-	if (flash === 'good') {
-		return colors.accent;
+	if (state.flash === 'good' || state.shield > 0) {
+		return colors.saved;
 	}
 
 	return colors.text;
 };
 
+const trackCell = (lane: number, x: number): RenderCell => {
+	if (x === PLAYER_X) {
+		return {color: colors.brandAlt, dim: true, label: '|'};
+	}
+
+	if ((x + lane) % 9 === 0) {
+		return {color: colors.brandAlt, dim: true, label: '-'};
+	}
+
+	return {color: colors.brandAlt, dim: true, label: '.'};
+};
+
 const advanceArcade = (current: ArcadeState): ArcadeState => {
 	const tick = current.tick + 1;
-	let score = current.score;
+	let score = current.score + (tick % 3 === 0 ? 1 : 0);
 	let combo = current.combo;
 	let bestCombo = current.bestCombo;
 	let dodges = current.dodges;
 	let bonks = current.bonks;
+	let nearMisses = current.nearMisses;
+	let shield = current.shield;
 	let flash: ArcadeState['flash'] = null;
+	let event = current.event;
+	let eventKind = current.eventKind;
 	const nextItems: RunnerItem[] = [];
 
 	for (const item of current.items) {
@@ -101,27 +185,55 @@ const advanceArcade = (current: ArcadeState): ArcadeState => {
 
 		if (movedItem.x === PLAYER_X && movedItem.lane === current.playerLane) {
 			if (movedItem.kind === 'coin') {
-				score += 5 + Math.min(5, combo);
+				const points = 10 + comboBonus(combo);
+				score += points;
 				combo += 1;
 				bestCombo = Math.max(bestCombo, combo);
 				flash = 'good';
-			} else {
-				score = Math.max(0, score - 4);
-				combo = 0;
+				event = `+${points} coin line. Combo x${combo}.`;
+				eventKind = 'good';
+			} else if (movedItem.kind === 'boost') {
+				shield = Math.min(3, shield + 1);
+				score += 8;
+				combo += 1;
+				bestCombo = Math.max(bestCombo, combo);
+				flash = 'good';
+				event = `Shield charged. ${shield} buffer${shield === 1 ? '' : 's'}.`;
+				eventKind = 'good';
+			} else if (shield > 0) {
+				shield -= 1;
 				bonks += 1;
+				score = Math.max(0, score - 3);
+				combo = 0;
 				flash = 'bad';
+				event = 'Shield ate the hit. Keep moving.';
+				eventKind = 'neutral';
+			} else {
+				bonks += 1;
+				score = Math.max(0, score - 12);
+				combo = 0;
+				flash = 'bad';
+				event = '-12 rail block. Lane switch sooner.';
+				eventKind = 'bad';
 			}
 
 			continue;
 		}
 
 		if (movedItem.x < 0) {
-			if (movedItem.kind === 'block') {
-				dodges += 1;
+			if (movedItem.kind === 'obstacle') {
+				const nearMiss = Math.abs(movedItem.lane - current.playerLane) === 1;
+				const points = nearMiss ? 8 + comboBonus(combo) : 4 + comboBonus(combo);
+				score += points;
 				combo += 1;
 				bestCombo = Math.max(bestCombo, combo);
-				score += 1 + Math.min(4, Math.floor(combo / 2));
+				dodges += 1;
 				flash = flash ?? 'good';
+				event = nearMiss
+					? `+${points} near miss. Combo x${combo}.`
+					: `+${points} clean dodge. Combo x${combo}.`;
+				eventKind = 'good';
+				nearMisses += nearMiss ? 1 : 0;
 			}
 
 			continue;
@@ -131,44 +243,75 @@ const advanceArcade = (current: ArcadeState): ArcadeState => {
 	}
 
 	let nextId = current.nextId;
+	const spawnInterval = spawnIntervalFor(tick);
 
-	if (tick % SPAWN_EVERY_TICKS === 0) {
+	if (tick % spawnInterval === 0) {
+		const obstacleLane = Math.floor(Math.random() * LANES);
 		nextItems.push({
 			id: nextId,
-			kind: tick % 15 === 0 ? 'coin' : 'block',
-			lane: Math.floor(Math.random() * LANES),
+			kind: 'obstacle',
+			lane: obstacleLane,
+			x: TRACK_WIDTH - 1,
+		});
+		nextId += 1;
+
+		const rewardLane = chooseOtherLane(obstacleLane);
+		nextItems.push({
+			id: nextId,
+			kind: tick % 30 === 0 ? 'boost' : 'coin',
+			lane: rewardLane,
 			x: TRACK_WIDTH - 1,
 		});
 		nextId += 1;
 	}
 
+	if (tick > 90 && tick % (spawnInterval * 3) === 0) {
+		const usedLanes = new Set(
+			nextItems
+				.filter(item => item.x === TRACK_WIDTH - 1)
+				.map(item => item.lane),
+		);
+		const openLane = [0, 1, 2].find(lane => !usedLanes.has(lane));
+
+		if (openLane !== undefined) {
+			nextItems.push({
+				id: nextId,
+				kind: 'obstacle',
+				lane: openLane,
+				x: TRACK_WIDTH - 1,
+			});
+			nextId += 1;
+		}
+	}
+
 	const flashTicks =
-		flash === null ? Math.max(0, current.flashTicks - 1) : 3;
+		flash === null ? Math.max(0, current.flashTicks - 1) : 4;
 
 	return {
 		bestCombo,
 		bonks,
 		combo,
 		dodges,
+		event,
+		eventKind,
 		flash: flash ?? (flashTicks > 0 ? current.flash : null),
 		flashTicks,
 		items: nextItems,
+		nearMisses,
 		nextId,
 		playerLane: current.playerLane,
 		score,
+		shield,
 		tick,
 	};
 };
 
-const clampLane = (lane: number): number =>
-	Math.max(0, Math.min(LANES - 1, lane));
-
-const truncateOutput = (text: string): string => {
-	if (text.length <= OUTPUT_WIDTH) {
+const truncateOutput = (text: string, width: number): string => {
+	if (text.length <= width) {
 		return text;
 	}
 
-	return `${text.slice(0, OUTPUT_WIDTH - 1)}…`;
+	return `${text.slice(0, width - 1)}…`;
 };
 
 const statusText = (result: CommandRunResult): string => {
@@ -187,14 +330,22 @@ const statusText = (result: CommandRunResult): string => {
 	return 'finished';
 };
 
+const eventColor = (kind: EventKind): InkColor => {
+	if (kind === 'bad') {
+		return colors.failed;
+	}
+
+	if (kind === 'good') {
+		return colors.saved;
+	}
+
+	return colors.brandAlt;
+};
+
 const ArcadeBoard = ({state}: {state: ArcadeState}) => {
 	const rows = useMemo(() => {
-		const nextRows = Array.from({length: LANES}, () =>
-			Array.from({length: TRACK_WIDTH}, () => ({
-				color: colors.brandAlt as InkColor,
-				dim: true,
-				label: '· ',
-			})),
+		const nextRows = Array.from({length: LANES}, (_, lane) =>
+			Array.from({length: TRACK_WIDTH}, (_, x) => trackCell(lane, x)),
 		);
 
 		for (const item of state.items) {
@@ -207,63 +358,99 @@ const ArcadeBoard = ({state}: {state: ArcadeState}) => {
 				nextRows[item.lane]![item.x] = {
 					color: itemColor(item.kind),
 					dim: false,
-					label: item.kind === 'coin' ? '$ ' : '# ',
+					label: itemLabel(item.kind),
 				};
 			}
 		}
 
 		nextRows[state.playerLane]![PLAYER_X] = {
-			color: playerColor(state.flash),
+			color: playerColor(state),
 			dim: false,
-			label: state.flash === 'bad' ? 'x ' : '@ ',
+			label: state.flash === 'bad' ? 'X' : '@',
 		};
 
 		return nextRows;
-	}, [state.flash, state.items, state.playerLane]);
+	}, [state]);
+
+	const divider = `├${'─'.repeat(TRACK_WIDTH)}┤`;
 
 	return (
 		<Box flexDirection="column">
-			<Text color={colors.brandAlt}>╭{'─'.repeat(TRACK_WIDTH * 2)}╮</Text>
+			<Text color={colors.brandAlt}>╭{'─'.repeat(TRACK_WIDTH)}╮</Text>
 			{rows.map((row, rowIndex) => (
-				<Text key={rowIndex} color={colors.brandAlt}>
-					│
-					{row.map((cell, cellIndex) => (
-						<Text
-							key={`${rowIndex}-${cellIndex}`}
-							color={cell.color}
-							dimColor={cell.dim}
-						>
-							{cell.label}
+				<Box flexDirection="column" key={rowIndex}>
+					<Text color={colors.brandAlt}>
+						│
+						{row.map((cell, cellIndex) => (
+							<Text
+								key={`${rowIndex}-${cellIndex}`}
+								color={cell.color}
+								dimColor={cell.dim}
+							>
+								{cell.label}
+							</Text>
+						))}
+						│
+					</Text>
+					{rowIndex < rows.length - 1 ? (
+						<Text color={colors.brandAlt} dimColor>
+							{divider}
 						</Text>
-					))}
-					│
-				</Text>
+					) : null}
+				</Box>
 			))}
-			<Text color={colors.brandAlt}>╰{'─'.repeat(TRACK_WIDTH * 2)}╯</Text>
+			<Text color={colors.brandAlt}>╰{'─'.repeat(TRACK_WIDTH)}╯</Text>
 		</Box>
 	);
 };
 
-const RecentOutput = ({lines}: {lines: CommandOutputLine[]}) => (
-	<Box flexDirection="column">
-		<Text bold color={colors.brandAlt}>
-			recent output
-		</Text>
-		{lines.length === 0 ? (
-			<Text dimColor>No output yet.</Text>
-		) : (
-			lines.map(line => (
-				<Text key={line.id}>
-					<Text color={line.kind === 'stderr' ? colors.failed : colors.saved}>
-						{line.kind === 'stderr' ? 'err' : 'out'}
-					</Text>
-					<Text dimColor> │ </Text>
-					<Text>{truncateOutput(line.text)}</Text>
-				</Text>
-			))
-		)}
-	</Box>
+const StatChip = ({
+	label,
+	value,
+}: {
+	label: string;
+	value: string | number;
+}) => (
+	<Text>
+		<Text color={colors.brandAlt}>[</Text>
+		<Text dimColor>{label} </Text>
+		<Text bold>{value}</Text>
+		<Text color={colors.brandAlt}>]</Text>
+	</Text>
 );
+
+const RecentOutput = ({
+	lines,
+	visibleLines,
+	width,
+}: {
+	lines: CommandOutputLine[];
+	visibleLines: number;
+	width: number;
+}) => {
+	const visible = lines.slice(-visibleLines);
+
+	return (
+		<Box flexDirection="column" minWidth={Math.min(width + 8, 80)}>
+			<Text bold color={colors.brandAlt}>
+				live command output
+			</Text>
+			{visible.length === 0 ? (
+				<Text dimColor>Waiting for stdout/stderr…</Text>
+			) : (
+				visible.map(line => (
+					<Text key={line.id}>
+						<Text color={line.kind === 'stderr' ? colors.failed : colors.saved}>
+							{line.kind === 'stderr' ? 'err' : 'out'}
+						</Text>
+						<Text dimColor> │ </Text>
+						<Text>{truncateOutput(line.text, width)}</Text>
+					</Text>
+				))
+			)}
+		</Box>
+	);
+};
 
 export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 	const {exit} = useApp();
@@ -272,31 +459,43 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 		[args, command],
 	);
 	const runnerRef = useRef<RunningCommand | null>(null);
+	const startedAtRef = useRef(Date.now());
 	const [arcade, setArcade] = useState<ArcadeState>(() => initialArcadeState());
+	const terminalColumns = process.stdout.columns ?? 120;
+	const isCompact = terminalColumns < NARROW_TERMINAL_COLUMNS;
+	const visibleOutputLines = isCompact ? COMPACT_OUTPUT_LINES : RECENT_OUTPUT_LINES;
+	const outputWidth = isCompact
+		? Math.max(36, Math.min(COMPACT_OUTPUT_WIDTH, terminalColumns - 12))
+		: OUTPUT_WIDTH;
 	const [outputLines, setOutputLines] = useState<CommandOutputLine[]>([]);
 	const [runState, setRunState] = useState<RunState>({
 		elapsedMs: 0,
+		finishedAt: null,
 		result: null,
 		status: 'running',
 	});
 	const [isCancelling, setIsCancelling] = useState(false);
+	const [exitHint, setExitHint] = useState('Auto-exits with the command status.');
 
 	useEffect(() => {
-		const startedAt = Date.now();
+		startedAtRef.current = Date.now();
 		const runner = startCommandRunner({
 			args,
 			command,
 			onOutput: line => {
-				setOutputLines(current => trimOutputLines([...current, line]));
+				setOutputLines(current =>
+					trimOutputLines([...current, line], visibleOutputLines),
+				);
 			},
 		});
 
 		runnerRef.current = runner;
 
 		void runner.result.then(result => {
-			setOutputLines(trimOutputLines(result.outputLines));
+			setOutputLines(trimOutputLines(result.outputLines, visibleOutputLines));
 			setRunState({
 				elapsedMs: result.elapsedMs,
+				finishedAt: Date.now(),
 				result,
 				status: 'finished',
 			});
@@ -305,7 +504,7 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 		const elapsedTimer = setInterval(() => {
 			setRunState(current =>
 				current.status === 'running'
-					? {...current, elapsedMs: Date.now() - startedAt}
+					? {...current, elapsedMs: Date.now() - startedAtRef.current}
 					: current,
 			);
 		}, 250);
@@ -314,13 +513,9 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 			clearInterval(elapsedTimer);
 			runner.cancel();
 		};
-	}, [args, command]);
+	}, [args, command, visibleOutputLines]);
 
 	useEffect(() => {
-		if (runState.status !== 'running') {
-			return;
-		}
-
 		const arcadeTimer = setInterval(() => {
 			setArcade(current => advanceArcade(current));
 		}, TICK_MS);
@@ -328,7 +523,7 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 		return () => {
 			clearInterval(arcadeTimer);
 		};
-	}, [runState.status]);
+	}, []);
 
 	useEffect(() => {
 		if (runState.status !== 'finished' || !runState.result) {
@@ -336,30 +531,58 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 		}
 
 		const exitCode = exitStatusFromResult(runState.result);
+		const visibleForMs = Date.now() - startedAtRef.current;
+		const delayMs = Math.max(EXIT_AFTER_FINISH_MS, MIN_VISIBLE_MS - visibleForMs);
+		setExitHint(
+			`Press Enter to exit now, or auto-exit in ${Math.ceil(
+				delayMs / 1000,
+			)}s.`,
+		);
+
 		const timer = setTimeout(() => {
 			onExitCode(exitCode);
 			exit();
-		}, EXIT_AFTER_FINISH_MS);
+		}, delayMs);
 
 		return () => {
 			clearTimeout(timer);
 		};
 	}, [exit, onExitCode, runState]);
 
-	useInput((input, key) => {
-		if (runState.status !== 'running') {
+	const finishNow = (): void => {
+		if (runState.status !== 'finished' || !runState.result) {
 			return;
 		}
 
+		onExitCode(exitStatusFromResult(runState.result));
+		exit();
+	};
+
+	useInput((input, key) => {
 		const normalizedInput = input.toLowerCase();
 
 		if (key.ctrl && normalizedInput === 'c') {
-			setIsCancelling(true);
-			runnerRef.current?.cancel();
+			if (runState.status === 'running') {
+				setIsCancelling(true);
+				runnerRef.current?.cancel();
+				return;
+			}
+
+			finishNow();
 			return;
 		}
 
-		if (key.upArrow || normalizedInput === 'w') {
+		if (runState.status === 'finished' && key.return) {
+			finishNow();
+			return;
+		}
+
+		if (
+			key.upArrow ||
+			key.leftArrow ||
+			normalizedInput === 'w' ||
+			normalizedInput === 'a'
+		) {
 			setArcade(current => ({
 				...current,
 				playerLane: clampLane(current.playerLane - 1),
@@ -367,7 +590,12 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 			return;
 		}
 
-		if (key.downArrow || normalizedInput === 's') {
+		if (
+			key.downArrow ||
+			key.rightArrow ||
+			normalizedInput === 's' ||
+			normalizedInput === 'd'
+		) {
 			setArcade(current => ({
 				...current,
 				playerLane: clampLane(current.playerLane + 1),
@@ -380,47 +608,63 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 			? exitStatusFromResult(runState.result)
 			: null;
 	const succeeded = finalExitCode === 0;
+	const currentSpawnInterval = spawnIntervalFor(arcade.tick);
+	const speedLevel =
+		currentSpawnInterval === 3 ? 3 : currentSpawnInterval === 4 ? 2 : 1;
+
+	const board = (
+		<Box flexDirection="column">
+			<ArcadeBoard state={arcade} />
+			<Text color={eventColor(arcade.eventKind)}>{arcade.event}</Text>
+			<Text dimColor>
+				W/S, A/D, or arrows switch rails · dodge # · collect $ · shields +
+			</Text>
+		</Box>
+	);
+	const output = (
+		<RecentOutput
+			lines={outputLines}
+			visibleLines={visibleOutputLines}
+			width={outputWidth}
+		/>
+	);
 
 	return (
 		<Box flexDirection="column" gap={1}>
 			<Box flexDirection="column">
 				<Text bold color={colors.brand}>
-					✦ VIBEBREAK WAIT // {commandDisplay}
-				</Text>
-				<Text dimColor>
-					Non-interactive command mode. Move with W/S or arrows. Ctrl-C cancels.
+					VIBEBREAK WAIT RAILS // {commandDisplay}
 				</Text>
 				<Text>
-					<Text color={colors.brandAlt}>[</Text>
-					<Text dimColor>Elapsed </Text>
-					<Text bold>{formatDuration(runState.elapsedMs)}</Text>
-					<Text color={colors.brandAlt}>]</Text>
+					<StatChip label="time" value={formatDuration(runState.elapsedMs)} />
 					{'  '}
-					<Text color={colors.brandAlt}>[</Text>
-					<Text dimColor>Score </Text>
-					<Text bold>{arcade.score}</Text>
-					<Text color={colors.brandAlt}>]</Text>
+					<StatChip label="score" value={arcade.score} />
 					{'  '}
-					<Text color={colors.brandAlt}>[</Text>
-					<Text dimColor>Combo </Text>
-					<Text bold>x{arcade.combo}</Text>
-					<Text color={colors.brandAlt}>]</Text>
+					<StatChip label="combo" value={`x${arcade.combo}`} />
+					{'  '}
+					<StatChip label="shield" value={arcade.shield} />
+					{'  '}
+					<StatChip label="speed" value={speedLevel} />
 				</Text>
 			</Box>
 
-			<Box columnGap={2} flexDirection="row">
-				<Box flexDirection="column">
-					<ArcadeBoard state={arcade} />
-					<Text dimColor>
-						dodge # · collect $ · Q does nothing here
-					</Text>
+			{isCompact ? (
+				<Box flexDirection="column" gap={1}>
+					{board}
+					{output}
 				</Box>
-				<RecentOutput lines={outputLines} />
-			</Box>
+			) : (
+				<Box columnGap={3} flexDirection="row">
+					{board}
+					{output}
+				</Box>
+			)}
 
 			{runState.status === 'running' ? (
 				<Text color={isCancelling ? colors.failed : colors.accent}>
-					{isCancelling ? 'Cancelling command…' : 'Command is running…'}
+					{isCancelling
+						? 'Cancelling command with Ctrl-C…'
+						: 'Command running. Q is disabled here so tests are not cancelled by accident.'}
 				</Text>
 			) : (
 				<Box flexDirection="column">
@@ -432,8 +676,9 @@ export const WaitMode = ({args, command, onExitCode}: WaitModeProps) => {
 						</Text>
 					</Text>
 					<Text dimColor>
-						Exiting with status {finalExitCode}. Best combo x{arcade.bestCombo};
-						dodged {arcade.dodges}; bonks {arcade.bonks}.
+						Exit {finalExitCode}. Best combo x{arcade.bestCombo}; dodges{' '}
+						{arcade.dodges}; near misses {arcade.nearMisses}; bonks{' '}
+						{arcade.bonks}. {exitHint}
 					</Text>
 				</Box>
 			)}

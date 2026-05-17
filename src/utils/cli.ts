@@ -84,7 +84,7 @@ Usage:
   vibebreak-arcade daily            Play today's break
   vibebreak-arcade play <game-id>   Play a specific game
   vibebreak-arcade scores           Show local high scores
-  vibebreak-arcade wait -- <cmd>    Run a non-interactive command with arcade wait mode
+  vibebreak-arcade wait -- <cmd>    Run a command with playable arcade wait mode
 
 Games:
 ${games.map(game => `  ${game.id.padEnd(13)} ${game.name}`).join('\n')}
